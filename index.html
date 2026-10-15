@@ -3,32 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
   
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <title>Rk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+       <title>Rk</title>
+    <link rel="stylesheet" href="assets/css/navbar.css">
+    <script src="assets/js/navbar.js" defer></script>
 </head>
 <body>
     
-<div class="navbar">
-<div class="nav-logo border">    
-</div>
-<div class="serach-bar">
-    <input class="search-box" type="text" placeholder="Search for taste">
-    <button class="search-button"><i class="fa-solid fa-magnifying-glass"></i> </button>
-
-</div>
-<div class="tags-search">
-    <ul class="anchor1"> 
-        <a href="index.html">Home</a>
-         <a href="contact.html">Contact</a>
-          <a href="about.html">About</a>
-    </ul>
-</div>
-
-  
-
-</div>
+<header class="home-navbar">
+    <div class="home-navbar__container">
+        <a href="index.html" class="home-navbar__brand" aria-label="RK Sweets home">
+            <img src="assets/images/rk-sweet-shop-logo.png" alt="RK Sweets Shop Logo" class="home-navbar__logo-img">
+            <span class="home-navbar__brand-text">RK <small>Sweets</small></span>
+        </a>
+        <button class="home-navbar__toggle" type="button" aria-label="Toggle navigation" aria-controls="homeNavbarMenu" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+        <nav id="homeNavbarMenu" class="home-navbar__menu" aria-label="Main navigation">
+            <ul class="home-navbar__list">
+                <li class="home-navbar__item"><a href="index.html" class="home-navbar__link">Home</a></li>
+                <li class="home-navbar__item"><a href="contact.html" class="home-navbar__link">Contact</a></li>
+                <li class="home-navbar__item"><a href="about.html" class="home-navbar__link">About</a></li>
+                <li class="home-navbar__item home-navbar__item--cta"><a href="signup.html" class="home-navbar__link home-navbar__link--cta">Sign Up</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
 
     <div class="front-photo">
 <div class="line-1"><h2>Sweeten your moments with the magic of authentic Indian delights</h2></div>
@@ -239,30 +246,28 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="text-culture">
 
 <h2 class="head-text-line">Bold flavors, big hearts—Punjabi food is pure joy</h2>
-<div class="outer-cover"><p>Punjabi food culture is a vibrant tapestry woven with bold flavors, heartfelt hospitality, and deep-rooted traditions. From the smoky aroma of tandoori dishes to the comforting richness of butter-laden curries, every meal is a celebration of community and joy. <span id="dots">...</span><span id="more">Whether it's sarson da saag with makki di roti or a bubbling pot of dal makhani, the cuisine reflects the warmth and generosity of Punjabi spirit—where food isn’t just nourishment, it’s an experience shared with laughter, love, and pride.Fast food may be a global trend, but in Punjab, it’s been reimagined with a flavorful twist that reflects the region’s rich culinary heritage. From spicy Amritsari kulchas served hot off the tandoor to buttery chole bhature dished out at roadside dhabas, Punjabi fast food blends speed with soul. Even the humble golgappa gets a bold makeover with tangy fillings and fiery chutneys that match the Punjabi zest for life. Whether it’s a tall glass of creamy lassi or a quick bite of paneer tikka roll, fast food in Punjab isn’t just about convenience—it’s a celebration of taste, tradition, and the joy of eating with heart.</span></p></div>
-<button onclick="myFunction()" id="myBtn">SeeMore  <i class="fa-solid fa-angle-down" ></i></button>
+<div class="outer-cover"><p>Punjabi food culture is a vibrant tapestry woven with bold flavors, heartfelt hospitality, and deep-rooted traditions. From the smoky aroma of tandoori dishes to the comforting richness of butter-laden curries, every meal is a celebration of community and joy. <span id="dots">...</span><span id="more" hidden>Whether it's sarson da saag with makki di roti or a bubbling pot of dal makhani, the cuisine reflects the warmth and generosity of Punjabi spirit—where food isn’t just nourishment, it’s an experience shared with laughter, love, and pride.Fast food may be a global trend, but in Punjab, it’s been reimagined with a flavorful twist that reflects the region’s rich culinary heritage. From spicy Amritsari kulchas served hot off the tandoor to buttery chole bhature dished out at roadside dhabas, Punjabi fast food blends speed with soul. Even the humble golgappa gets a bold makeover with tangy fillings and fiery chutneys that match the Punjabi zest for life. Whether it’s a tall glass of creamy lassi or a quick bite of paneer tikka roll, fast food in Punjab isn’t just about convenience—it’s a celebration of taste, tradition, and the joy of eating with heart.</span></p></div>
+<button type="button" onclick="myFunction()" id="myBtn" aria-controls="more" aria-expanded="false">See More <i class="fa-solid fa-angle-down" aria-hidden="true"></i></button>
 
 <script>
     function myFunction() {
-  var dots = document.getElementById("dots");
-  var moreText = document.getElementById("more");
-  var btnText = document.getElementById("myBtn");
+  const dots = document.getElementById("dots");
+  const moreText = document.getElementById("more");
+  const btnText = document.getElementById("myBtn");
+  const isExpanded = !moreText.hidden;
 
-    if (dots.style.display === "none") {
-        dots.style.display = "inline";
-        btnText.innerHTML = 'Seemore <i class="fa-solid fa-angle-down" ></i>';
-        moreText.style.display = "none";
-    } else {
-        dots.style.display = "none";
-        btnText.innerHTML = ' <i class="fa-solid fa-angle-up" ></i>';
-        moreText.style.display = "inline";
-    }
+  moreText.hidden = isExpanded;
+  dots.hidden = !isExpanded;
+  btnText.setAttribute("aria-expanded", String(!isExpanded));
+  btnText.innerHTML = isExpanded
+    ? 'See More <i class="fa-solid fa-angle-down" aria-hidden="true"></i>'
+    : 'See Less <i class="fa-solid fa-angle-up" aria-hidden="true"></i>';
 }
 </script>
 </div>
 <br><br><br><br><br><br> <br>  
 
-<div class="sweettextupperWrap"><h1 class="sweettextupper"> Top Trending sweets 
+<div class="sweettextupperWrap" id="trending-sweets"><h1 class="sweettextupper"> Top Trending sweets
  <i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i>
 </h1></div>
 <div class="logo-textpic">
@@ -279,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
    <br><br>
-<div class="sweettextupperWrap"><h1 class="sweettextupper"> Top Trending Fastfood 
+<div class="sweettextupperWrap" id="trending-fast-food"><h1 class="sweettextupper"> Top Trending Fastfood
 <i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i><i class="fa-solid fa-star icon-white"></i>
 </h1></div>
 <div class="outerrappforfastfood">
@@ -322,27 +327,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     </div>
    
- <div class="footerContant2">
-  <div class="footerform">
-    <form class="mailservice">
-      <h2 class="subscribe-text">Signup For Updates </h2> 
-    <a href="login.html"><button type="button" class="subscribe-button">LOGIN</button></a>
-   <a href="signup.html"><button type="button" class="subscribe-button">SIGN UP</button></a>
-    
-    </form>
-
-  </div> 
-
-  <div class="socialmediahandles">
-    <div class="twitterfooter socailmedia"></div>
-    <div class="instagramefooter socailmedia"></div>
-    <div class="facbookfooter socailmedia"></div>
-  </div>
-   </div>
-  </footer>
-  <div class="lastfooterspace"> </div>
-
  
+  </footer> 
+  <!-- <div class="lastfooterspace"> </div> -->
+ 
+
 
 </body>
 </html>

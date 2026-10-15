@@ -21,7 +21,7 @@
 }
 .nav-logo{
     
-    background-image:url(Untitled\ design\ \(1\).png);
+    background-image:url(assets/images/Untitled\ design\ \(1\).png);
     height: 95%;
     width: 90px;
     background-size: cover;
@@ -106,7 +106,7 @@ a:hover {
 
     margin-top: 20px;
     height: 400px;
-    background-image: url(panel3.png);
+    background-image: url(assets/images/panel3.png);
      background-repeat: no-repeat;
     background-size: cover;
 
@@ -165,7 +165,7 @@ a:hover {
 
        footer{ 
       margin-top: 300px;
-      height: 510px;
+      height: 310px;
       width: 100%;
        background-color: #546980;
 
@@ -400,20 +400,20 @@ a:hover {
     border-radius: 50%;
 }
 .twitterfooter{
-    background-image: url(771367_circle_facebook_logo_media_network_icon.png);
+    background-image: url(assets/images/771367_circle_facebook_logo_media_network_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 
 }
 
 .instagramefooter{
-    background-image: url(771365_circle_logo_media_network_social_icon.png);
+    background-image: url(assets/images/771365_circle_logo_media_network_social_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 }
 
 .facbookfooter{
-     background-image: url(1164349_circle_instagram_logo_media_network_icon.png);
+     background-image: url(assets/images/1164349_circle_instagram_logo_media_network_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 }
@@ -427,25 +427,31 @@ a:hover {
 
 
     </style>
+    <link rel="stylesheet" href="assets/css/navbar.css">
+    <script src="assets/js/navbar.js" defer></script>
 </head>
 <body>
-   <div class="navbar">
-<div class="nav-logo border">    
-</div>
-<div class="serach-bar">
-    <input class="search-box" type="text" placeholder="Search for taste">
-    <button class="search-button"><i class="fa-solid fa-magnifying-glass"></i> </button>
-
-</div>
-<div class="tags-search">
-    <ul class="anchor1"> 
-      <a href="index.html">Home</a>
-         <a href="contact.html">Contact</a>
-          <a href="about.html">About</a>
-    </ul>
-</div>
-
-</div>
+   <header class="home-navbar">
+    <div class="home-navbar__container">
+        <a href="index.html" class="home-navbar__brand" aria-label="RK Sweets home">
+            <img src="assets/images/rk-sweet-shop-logo.png" alt="RK Sweets Shop Logo" class="home-navbar__logo-img">
+            <span class="home-navbar__brand-text">RK <small>Sweets</small></span>
+        </a>
+        <button class="home-navbar__toggle" type="button" aria-label="Toggle navigation" aria-controls="homeNavbarMenu" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+        <nav id="homeNavbarMenu" class="home-navbar__menu" aria-label="Main navigation">
+            <ul class="home-navbar__list">
+                <li class="home-navbar__item"><a href="index.html" class="home-navbar__link">Home</a></li>
+                <li class="home-navbar__item"><a href="contact.html" class="home-navbar__link">Contact</a></li>
+                <li class="home-navbar__item"><a href="about.html" class="home-navbar__link">About</a></li>
+                <li class="home-navbar__item home-navbar__item--cta"><a href="signup.html" class="home-navbar__link home-navbar__link--cta">Sign Up</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
     <main>
         <section class="hero-about">
             <div class="container">
@@ -509,23 +515,9 @@ a:hover {
 
     </div>
    
- <div class="footerContant2">
-  <div class="footerform">
-    <form class="mailservice">
-      <h2 class="subscribe-text">Signup For Updates </h2> 
-    <a href="login.html"><button type="button" class="subscribe-button">LOGIN</button></a>
-    </form>
+ 
+  </footer> 
 
-  </div> 
-
-  <div class="socialmediahandles">
-<div class="twitterfooter socailmedia"></div>
-    <div class="instagramefooter socailmedia"></div>
-    <div class="facbookfooter socailmedia"></div>
-  </div>
-   </div>
-  </footer>
-  <div class="lastfooterspace"> </div>
 
  
     

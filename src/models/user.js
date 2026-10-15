@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { env } from "../config/env.js";
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -28,8 +29,8 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function(){
     const user = this;
     if (!user.isModified('password')) return;
-    const SALT = bcrypt.genSaltSync(9);
-    const encryptedPassword = bcrypt.hashSync(user.password,SALT);
+    const SALT = bcrypt.genSaltSync(env.bcryptSaltRounds);
+    const encryptedPassword = bcrypt.hashSync(user.password, SALT);
     user.password= encryptedPassword;
 
 });
@@ -39,14 +40,12 @@ userSchema.methods.comparePassword = function compare(password){
 }
 
 userSchema.methods.genJWT = function generate(){
-     return jwt.sign({id: this.id, email: this.email}, 'twitter_secret_key', {
+     return jwt.sign({id: this.id, email: this.email}, env.jwtSecret, {
         expiresIn: '1h'
      })
 }
 
 const User = mongoose.model("User", userSchema);
 export default User;
-
-
 
 

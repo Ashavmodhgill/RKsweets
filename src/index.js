@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import apiroutes from './routes/index.js'
 import passport from 'passport';
 import { passportAuth } from './config/jwt-middleware.js';
+import { env } from './config/env.js';
   passportAuth (passport);
 
 const app = express();
@@ -14,7 +15,7 @@ const app = express();
  app.use(passport.initialize());
  app.use('/api', apiroutes)
  
-app.listen(3003, async()=>{
+app.listen(env.port, async()=>{
 console.log("server started");
  await connect();
  console.log("DB connected")

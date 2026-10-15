@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Order Summary</title>
+  <link rel="stylesheet" href="assets/css/order.css">
+    <link rel="stylesheet" href="assets/css/navbar.css">
+    <script src="assets/js/navbar.js" defer></script>
+</head>
+<body>
+<header class="home-navbar">
+    <div class="home-navbar__container">
+        <a href="index.html" class="home-navbar__brand" aria-label="RK Sweets home">
+            <img src="assets/images/rk-sweet-shop-logo.png" alt="RK Sweets Shop Logo" class="home-navbar__logo-img">
+            <span class="home-navbar__brand-text">RK <small>Sweets</small></span>
+        </a>
+        <button class="home-navbar__toggle" type="button" aria-label="Toggle navigation" aria-controls="homeNavbarMenu" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+        <nav id="homeNavbarMenu" class="home-navbar__menu" aria-label="Main navigation">
+            <ul class="home-navbar__list">
+                <li class="home-navbar__item"><a href="index.html" class="home-navbar__link">Home</a></li>
+                <li class="home-navbar__item"><a href="index.html#trending-sweets" class="home-navbar__link">Products</a></li>
+                <li class="home-navbar__item"><a href="index.html#trending-fast-food" class="home-navbar__link">Showcase</a></li>
+                <li class="home-navbar__item"><a href="contact.html" class="home-navbar__link">Contact</a></li>
+                <li class="home-navbar__item"><a href="about.html" class="home-navbar__link">About</a></li>
+                <li class="home-navbar__item home-navbar__item--cta"><a href="signup.html" class="home-navbar__link home-navbar__link--cta">Sign Up</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+  <div class="page">
+    <header class="topbar">
+      <h1>Order Summary</h1>
+      <div class="order-meta">Order #<strong>RK-1029</strong> • <span>Mar 19, 2026</span></div>
+    </header>
+
+    <main class="container">
+      <section class="left">
+        <div class="card">
+          <h2>Shipping</h2>
+          <p class="muted">John Doe • john.doe@example.com</p>
+          <p>123 Main Street<br/>City, State 12345</p>
+        </div>
+
+        <div class="card items">
+          <h2>Items</h2>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="prod">
+                  <div class="prod-info"><strong>Spring Rolls (6 pcs)</strong><div class="muted small">Crispy veg rolls</div></div>
+                </td>
+                <td>$5.00</td>
+                <td>2</td>
+                <td class="subtotal">$10.00</td>
+                <td><span class="badge pending">Pending</span></td>
+              </tr>
+              <tr>
+                <td class="prod">
+                  <div class="prod-info"><strong>Veg Samosa (2 pcs)</strong><div class="muted small">Spiced potato</div></div>
+                </td>
+                <td>$3.50</td>
+                <td>3</td>
+                <td class="subtotal">$10.50</td>
+                <td><span class="badge pending">Pending</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="right">
+        <div class="card summary">
+          <h2>Payment</h2>
+          <div class="summary-row"><span>Subtotal</span><span id="sum-sub">$20.50</span></div>
+          <div class="summary-row"><span>Delivery</span><span id="sum-del">$2.00</span></div>
+          <div class="summary-row tax"><span>Tax</span><span id="sum-tax">$1.64</span></div>
+          <div class="summary-row total"><span>Total</span><span id="sum-total">$24.14</span></div>
+
+          <button id="payBtn" class="pay">Pay Now</button>
+
+          <div class="muted small note">We use secure payment processing. No card data is stored on this site.</div>
+        </div>
+      </aside>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="assets/js/order.js"></script>
+</body>
+</html>

@@ -12,7 +12,7 @@
 }
 .nav-logo{
     
-    background-image:url(Untitled\ design\ \(1\).png);
+    background-image:url(../images/Untitled\ design\ \(1\).png);
     height: 95%;
     width: 90px;
     background-size: cover;
@@ -137,7 +137,7 @@ a:hover {
     height: 500px; /* The container height */
     width: 90%; /* The container width */
     background-color: white;
-    background-image: url(rallgullaa1.jpg);
+    background-image: url(../images/rallgullaa1.jpg);
     /* 👇 Use 'contain' to ensure the entire image is visible */
     background-size: contain; 
     /* To center the image within the available space */
@@ -150,7 +150,7 @@ a:hover {
     height: 500px; /* The container height */
     width: 90%; /* The container width */
     background-color: white;
-    background-image: url(KajuKatli_1.webp);
+    background-image: url(../images/KajuKatli_1.webp);
     /* 👇 Use 'contain' to ensure the entire image is visible */
     background-size: contain; 
     /* To center the image within the available space */
@@ -163,7 +163,7 @@ a:hover {
     height: 500px; /* The container height */
     width: 90%; /* The container width */
     background-color: white;
-    background-image: url(coconut\ barfi.webp);
+    background-image: url(../images/coconut\ barfi.webp);
     /* 👇 Use 'contain' to ensure the entire image is visible */
     background-size: contain; 
     /* To center the image within the available space */
@@ -176,7 +176,7 @@ a:hover {
     height: 500px; /* The container height */
     width: 90%; /* The container width */
     background-color: white;
-    background-image: url(chocalate.webp);
+    background-image: url(../images/chocalate.webp);
     /* 👇 Use 'contain' to ensure the entire image is visible */
     background-size: contain; 
     /* To center the image within the available space */
@@ -190,7 +190,7 @@ a:hover {
     height: 500px; /* The container height */
     width: 90%; /* The container width */
     background-color: white;
-    background-image: url(jalebi.jpg);
+    background-image: url(../images/jalebi.jpg);
     /* 👇 Use 'contain' to ensure the entire image is visible */
     background-size: contain; 
     /* To center the image within the available space */
@@ -203,7 +203,7 @@ a:hover {
     height: 500px; /* The container height */
     width: 90%; /* The container width */
     background-color: white;
-    background-image: url(milkcake.jpg);
+    background-image: url(../images/milkcake.jpg);
     /* 👇 Use 'contain' to ensure the entire image is visible */
     background-size: contain; 
     /* To center the image within the available space */
@@ -216,7 +216,7 @@ a:hover {
     height: 500px; /* The container height */
     width: 90%; /* The container width */
     background-color: white;
-    background-image: url(simple\ barfi.jpg);
+    background-image: url(../images/simple\ barfi.jpg);
     /* 👇 Use 'contain' to ensure the entire image is visible */
     background-size: contain; 
     /* To center the image within the available space */
@@ -229,7 +229,7 @@ a:hover {
     height: 500px; 
     width: 90%; 
     background-color: white;
-    background-image: url(gulaaab2.1.webp);
+    background-image: url(../images/gulaaab2.1.webp);
     background-size: contain; 
     background-repeat: no-repeat;
     background-position: center; 
@@ -242,7 +242,7 @@ margin-bottom: 10px;
     height: 500px; 
     width: 90%; 
     background-color: white;
-    background-image: url(samosa122.jpeg);
+    background-image: url(../images/samosa122.jpeg);
     background-size: contain; 
     background-repeat: no-repeat;
     background-position: center; 
@@ -252,7 +252,7 @@ margin-bottom: 10px;
     height: 500px; 
     width: 90%; 
     background-color: white;
-    background-image: url(nudles.webp);
+    background-image: url(../images/nudles.webp);
     background-size: contain; 
     background-repeat: no-repeat;
     background-position: center; 
@@ -262,7 +262,7 @@ margin-bottom: 10px;
     height: 500px; 
     width: 90%; 
     background-color: white;
-    background-image: url(burger2.webp);
+    background-image: url(../images/burger2.webp);
     background-size: contain; 
     background-repeat: no-repeat;
     background-position: center; 
@@ -272,7 +272,7 @@ margin-bottom: 10px;
     height: 500px; 
     width: 90%; 
     background-color: white;
-    background-image: url(springrole.avif);
+    background-image: url(../images/springrole.avif);
     background-size: contain; 
     background-repeat: no-repeat;
     background-position: center; 
@@ -596,7 +596,7 @@ text-align: center;
 
        footer{ 
       margin-top: 300px;
-      height: 510px;
+      height: 310px;
       width: 100%;
        background-color: #546980;
 
@@ -818,20 +818,20 @@ text-align: center;
     border-radius: 50%;
 }
 .twitterfooter{
-    background-image: url(771367_circle_facebook_logo_media_network_icon.png);
+    background-image: url(../images/771367_circle_facebook_logo_media_network_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 
 }
 
 .instagramefooter{
-    background-image: url(771365_circle_logo_media_network_social_icon.png);
+    background-image: url(../images/771365_circle_logo_media_network_social_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 }
 
 .facbookfooter{
-     background-image: url(1164349_circle_instagram_logo_media_network_icon.png);
+     background-image: url(../images/1164349_circle_instagram_logo_media_network_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 }

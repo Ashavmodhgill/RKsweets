@@ -1,5 +1,6 @@
 import JWT from 'passport-jwt';
 import User from '../models/user.js';
+import { env } from './env.js';
 // this alll from the documantiona of the passport-jwt package
 
 
@@ -8,7 +9,7 @@ const ExtractJwt = JWT.ExtractJwt;
 
 const opts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: 'twitter_secret_key'
+    secretOrKey: env.jwtSecret
 }
 
 export const passportAuth = (passport) => {

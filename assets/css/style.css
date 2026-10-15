@@ -15,7 +15,7 @@
 }
 .nav-logo{
     
-    background-image:url(Untitled\ design\ \(1\).png);
+    background-image:url(../images/Untitled\ design\ \(1\).png);
     height: 95%;
     width: 90px;
     background-size: cover;
@@ -81,7 +81,7 @@ a:hover {
 
     margin-top: 20px;
     height: 500px;
-    background-image: url(panel3.png);
+    background-image: url(../images/panel3.png);
      background-repeat: no-repeat;
     background-size: cover;
 
@@ -182,7 +182,7 @@ justify-content: center;
     height: 210px;
     width: 306px;
     background-color: #546980;
-    background-image: url(rasgulla2.0.png);
+    background-image: url(../images/rasgulla2.0.png);
     background-size: cover;
    
 }
@@ -195,41 +195,41 @@ justify-content: center;
     height: 210px;
     width: 306px;
     background-color: #546980;
-    background-image: url(gullabjamun2.0.png);
+    background-image: url(../images/gullabjamun2.0.png);
     background-size: cover;
 }
 
 .img3{
     background-color: #546980;
-    background-image: url(milkcake.jpg);
+    background-image: url(../images/milkcake.jpg);
     background-size: cover;
 }
 
 .img4{
     background-color: #546980;
-    background-image: url(jalebi.jpg);
+    background-image: url(../images/jalebi.jpg);
     background-size: cover;
 }
 .img5{
     background-color: #546980;
-    background-image: url(chocalate.webp);
+    background-image: url(../images/chocalate.webp);
     background-size: cover;
 }
 .img6{
     background-color: #546980;
-    background-image: url(coconut\ barfi.webp);
+    background-image: url(../images/coconut\ barfi.webp);
     background-size: cover;
 }
 .img7{
 
     
     background-color: #546980;
-    background-image: url(kajukatli2.0.png);
+    background-image: url(../images/kajukatli2.0.png);
     background-size: cover;
 }
 .img8{
     background-color: #546980;
-    background-image: url(simplebarfi3.0.png);
+    background-image: url(../images/simplebarfi3.0.png);
     background-size: cover;
 }
 
@@ -510,7 +510,7 @@ justify-content: center;
 
     height: 80%;
     width: 100%;
-    background-image: url(samosa122.jpeg);
+    background-image: url(../images/samosa122.jpeg);
     background-size: cover;
      background-repeat: no-repeat;
 
@@ -520,7 +520,7 @@ justify-content: center;
     border-top-right-radius: 15px;
     height:80%;
     width: 100%;
-    background-image: url(nudles.webp);
+    background-image: url(../images/nudles.webp);
     background-size: cover;
      background-repeat: no-repeat;
 }
@@ -529,7 +529,7 @@ justify-content: center;
     border-top-right-radius: 15px;
     height:80%;
     width: 100%;
-    background-image: url(burger2.webp);
+    background-image: url(../images/burger2.webp);
     background-size: cover;
      background-repeat: no-repeat;
 }
@@ -748,7 +748,7 @@ p {
     /* margin-top: 50px; */
     margin-bottom: 50px;
     /* background-color: #6e3939; */
-    /* background-image: url(Untitled\ design\ \(1\).png); */
+    /* background-image: url(../images/Untitled\ design\ \(1\).png); */
     height: 200px;
     width: 200px;
     background-size: cover;
@@ -912,7 +912,7 @@ p {
 
 footer{ 
       margin-top: 150px;
-      height: 510px;
+      height: 310px; 
       width: 100%;
        background-color: #546980;
 
@@ -1135,20 +1135,20 @@ footer{
     border-radius: 50%;
 }
 .twitterfooter{
-    background-image: url(771367_circle_facebook_logo_media_network_icon.png);
+    background-image: url(../images/771367_circle_facebook_logo_media_network_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 
 }
 
 .instagramefooter{
-    background-image: url(771365_circle_logo_media_network_social_icon.png);
+    background-image: url(../images/771365_circle_logo_media_network_social_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 }
 
 .facbookfooter{
-     background-image: url(1164349_circle_instagram_logo_media_network_icon.png);
+     background-image: url(../images/1164349_circle_instagram_logo_media_network_icon.png);
         background-size: cover;
      background-repeat: no-repeat;
 }
@@ -1158,5 +1158,3 @@ footer{
     width: 100%;
     background-color: #fcfbf7;
 }
-
-
