@@ -1,0 +1,17 @@
+{
+  "name": "rk-sweets-v2",
+  "private": true,
+  "type": "module",
+  "workspaces": ["admin", "customer", "server"],
+  "scripts": {
+    "dev": "concurrently -k -n customer,admin,server -c cyan,yellow,green \"npm:dev:customer\" \"npm:dev:admin\" \"npm:dev:server\"",
+    "dev:customer": "npm --prefix customer run dev",
+    "dev:admin": "npm --prefix admin run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build": "npm --prefix customer run build && npm --prefix admin run build",
+    "test": "npm --prefix server test",
+    "lint": "npm --prefix server run lint && npm --prefix customer run lint && npm --prefix admin run lint",
+    "setup:admin": "npm --prefix server run setup:admin"
+  },
+  "devDependencies": { "concurrently": "9.2.5" }
+}
