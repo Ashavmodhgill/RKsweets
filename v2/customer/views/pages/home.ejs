@@ -1,17 +1,18 @@
 <%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
-<body class="portal portal-customer">
-  <main class="container">
-    <p class="eyebrow">RK SWEETS · CUSTOMER</p>
-    <h1>Welcome, <%= account.name %></h1>
-    <p>Your customer account is signed in.</p>
-    <nav class="portal-actions" aria-label="Customer account">
-      <a href="/profile">View profile</a>
-      <form method="post" action="/logout">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button class="button-secondary" type="submit">Sign out</button>
-      </form>
-    </nav>
+<body class="storefront">
+  <%- include('../partials/store-header', { account, activePath: '/' }) %>
+  <main class="store-main">
+    <section class="store-hero">
+      <div class="hero-copy"><p class="eyebrow">A LITTLE SWEETNESS FOR EVERY MOMENT</p><h1>Welcome back,<br><span><%= account.name %>.</span></h1><p>Explore the RK Sweets collection and find something special to share.</p><a class="store-button" href="/products">Explore the sweets <span aria-hidden="true">→</span></a></div>
+      <div class="hero-art" aria-hidden="true"><span class="hero-sun"></span><span class="hero-monogram">RK</span><span class="hero-caption">MADE WITH CARE</span></div>
+    </section>
+    <% if (categories.length) { %><section class="store-section category-section"><div class="section-title"><div><p class="eyebrow">FROM THE COUNTER</p><h2>Browse by category</h2></div><a class="text-link" href="/products">See all sweets →</a></div><div class="category-chips"><% categories.forEach((category) => { %><a href="/products?category=<%= encodeURIComponent(category) %>"><span>✦</span><%= category %></a><% }) %></div></section><% } %>
+    <section class="store-section featured-section"><div class="section-title"><div><p class="eyebrow">FRESH FROM THE CATALOGUE</p><h2>Available sweets</h2><p class="section-subtitle">Recently updated items in the shop.</p></div><a class="text-link" href="/products">Browse the full catalogue →</a></div>
+      <% if (featuredProducts.length) { %><div class="catalog-grid home-product-grid"><% featuredProducts.forEach((product) => { %><%- include('../partials/product-card', { product }) %><% }) %></div><% } else { %><div class="store-empty"><span>✦</span><h3>Our sweets are being prepared</h3><p>There are no available products to show right now. Please check back soon.</p><a class="text-link" href="/products">View the catalogue →</a></div><% } %>
+    </section>
+    <section class="account-callout"><div><p class="eyebrow">YOUR RK SWEETS ACCOUNT</p><h2>Everything in one place</h2><p>Review your account details and update your contact information.</p></div><a class="store-button store-button-light" href="/profile">View my account <span aria-hidden="true">→</span></a></section>
   </main>
+  <%- include('../partials/store-footer') %>
   <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
 </body>
 </html>

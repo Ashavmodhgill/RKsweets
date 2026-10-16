@@ -1,0 +1,12 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="storefront">
+  <%- include('../partials/store-header', { account, activePath: '/products' }) %>
+  <main class="store-main store-catalog-main">
+    <section class="catalog-heading"><p class="eyebrow">MADE FOR SHARING</p><h1>Our sweets</h1><p>Explore the current RK Sweets selection.</p></section>
+    <% if (categories.length) { %><nav class="catalog-category-nav" aria-label="Filter sweets by category"><a class="<%= selectedCategory ? '' : 'active' %>" href="/products">All sweets</a><% categories.forEach((category) => { %><a class="<%= selectedCategory === category ? 'active' : '' %>" href="/products?category=<%= encodeURIComponent(category) %>"><%= category %></a><% }) %></nav><% } %>
+    <% if (!products.length) { %><section class="store-empty"><span>✦</span><h2><%= selectedCategory ? `No sweets in ${selectedCategory} yet` : 'Our catalogue is being prepared' %></h2><p>Please check back soon for the latest selection.</p><% if (selectedCategory) { %><a class="text-link" href="/products">View all sweets →</a><% } %></section><% } else { %><section class="catalog-grid" aria-label="Products"><% products.forEach((product) => { %><%- include('../partials/product-card', { product }) %><% }) %></section><% } %>
+  </main>
+  <%- include('../partials/store-footer') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

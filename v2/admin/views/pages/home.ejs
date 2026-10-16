@@ -1,16 +1,28 @@
 <%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
-<body class="portal portal-admin">
-  <main class="container">
-    <p class="eyebrow">RK SWEETS · OWNER</p>
-    <h1>Welcome, <%= account.name %></h1>
-    <p>You are signed in to the owner portal.</p>
-    <nav class="portal-actions" aria-label="Owner account">
-      <form method="post" action="/logout">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button class="button-secondary" type="submit">Sign out</button>
-      </form>
-    </nav>
-  </main>
+<body class="admin-app">
+  <%- include('../partials/app-shell-start', { pageTitle, account, activePath: '/' }) %>
+      <section class="dashboard-welcome">
+        <div><p class="eyebrow">GOOD TO SEE YOU, <%= account.name.toUpperCase() %></p><h2>Your shop at a glance</h2><p>Manage your sweets and keep the customer catalogue up to date.</p></div>
+        <a class="button-primary" href="/products/new">＋ Add a product</a>
+      </section>
+      <section class="metric-grid" aria-label="Product metrics">
+        <article class="metric-card"><span class="metric-icon metric-icon-red">✦</span><div><p>Total products</p><strong><%= metrics.totalProducts %></strong><small>In your catalogue</small></div></article>
+        <article class="metric-card"><span class="metric-icon metric-icon-green">✓</span><div><p>Available</p><strong><%= metrics.availableProducts %></strong><small>Visible to customers</small></div></article>
+        <article class="metric-card"><span class="metric-icon metric-icon-muted">Ⅱ</span><div><p>Unavailable</p><strong><%= metrics.unavailableProducts %></strong><small>Hidden from the storefront</small></div></article>
+      </section>
+      <section class="dashboard-panel">
+        <header class="panel-heading"><div><p class="eyebrow">CATALOGUE ACTIVITY</p><h2>Recently updated products</h2></div><a class="inline-link" href="/products">View all products <span aria-hidden="true">→</span></a></header>
+        <% if (recentProducts.length) { %><div class="recent-products">
+          <% recentProducts.forEach((product) => { %><article class="recent-product">
+            <% if (product.imageUrl) { %><img src="<%= product.imageUrl %>" alt=""><% } else { %><span class="recent-placeholder" aria-hidden="true">RK</span><% } %>
+            <div class="recent-product-info"><strong><%= product.name %></strong><small><%= product.category %> · Updated <%= new Date(product.updatedAt).toLocaleDateString() %></small></div>
+            <span class="status <%= product.isAvailable ? 'status-live' : 'status-off' %>"><%= product.isAvailable ? 'Available' : 'Unavailable' %></span>
+            <a class="row-edit" href="/products/<%= product._id %>/edit">Edit</a>
+          </article><% }) %>
+        </div><% } else { %><div class="dashboard-empty"><span class="empty-mark">✦</span><h3>Your catalogue starts here</h3><p>Add your first product to show customers what’s fresh.</p><a class="button-primary" href="/products/new">Add your first product</a></div><% } %>
+      </section>
+      <section class="dashboard-shortcuts"><a href="/products"><span>✦</span><div><strong>Manage products</strong><small>Update details, prices, and availability</small></div><b aria-hidden="true">→</b></a><div class="shortcut-disabled"><span>▤</span><div><strong>Orders</strong><small>Order management is coming soon</small></div><b>Coming soon</b></div></section>
+  <%- include('../partials/app-shell-end') %>
   <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
 </body>
 </html>

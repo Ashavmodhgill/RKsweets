@@ -93,6 +93,8 @@ function createApp(env, portal) {
   app.use(logRequest);
   app.use('/assets', express.static(isAdmin ? adminAssets : customerAssets, { fallthrough: true, maxAge: '1h' }));
   app.use('/shared/assets', express.static(path.join(__dirname, 'public'), { fallthrough: true, maxAge: '1h' }));
+  // Product image uploads are base64 JSON capped at 4 MiB plus encoding overhead.
+  app.use('/products/images', express.json({ limit: '5.7mb' }));
   app.use(express.json({ limit: '32kb' }));
   app.use(express.urlencoded({ extended: false, limit: '32kb' }));
   app.use(portalSession);

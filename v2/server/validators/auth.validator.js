@@ -10,15 +10,17 @@ const passwordSchema = z.string()
   .min(12, 'Password must be at least 12 characters.')
   .refine((value) => Buffer.byteLength(value, 'utf8') <= 72, 'Password must be no more than 72 UTF-8 bytes.');
 
-const customerRegistrationSchema = z.object({
+const ownerCreationSchema = z.object({
   name: z.string().trim().min(2).max(80),
   mobile: mobileNumberSchema,
   password: passwordSchema,
 });
+
+const customerRegistrationSchema = ownerCreationSchema;
 
 const loginSchema = z.object({
   mobile: mobileNumberSchema,
   password: z.string().min(1).refine((value) => Buffer.byteLength(value, 'utf8') <= 72),
 });
 
-module.exports = { mobileNumberSchema, passwordSchema, customerRegistrationSchema, loginSchema };
+module.exports = { mobileNumberSchema, passwordSchema, customerRegistrationSchema, ownerCreationSchema, loginSchema };

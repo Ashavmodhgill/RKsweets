@@ -1,0 +1,9 @@
+<div class="admin-shell" id="admin-shell">
+  <%- include('./sidebar', { activePath, csrfToken }) %>
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false" id="admin-menu-toggle">☰</button>
+      <div class="topbar-title"><p class="eyebrow">OWNER WORKSPACE</p><h1><%= pageTitle %></h1></div>
+      <div class="shop-identity"><span class="identity-mark">RK</span><span><strong>RK Sweets</strong><small><%= account ? account.name : 'Owner portal' %></small></span></div>
+    </header>
+    <main class="admin-content">

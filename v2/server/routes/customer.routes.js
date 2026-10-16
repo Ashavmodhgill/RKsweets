@@ -6,6 +6,7 @@ const { requireLoggedInCustomer, redirectIfAuthenticated } = require('../middlew
 const { loginAttemptLimiter } = require('../middlewares/auth-rate-limit');
 const { validate } = require('../middlewares/validate');
 const { customerRegistrationSchema, loginSchema } = require('../validators/auth.validator');
+const products = require('../controllers/customer-products.controller');
 
 router.get('/login', redirectIfAuthenticated('customer'), customerAuth.showLogin);
 router.post('/login', redirectIfAuthenticated('customer'), loginAttemptLimiter, validate(loginSchema), customerAuth.login);
@@ -15,5 +16,7 @@ router.post('/register', redirectIfAuthenticated('customer'), validate(customerR
 router.get('/', requireLoggedInCustomer, customer.home);
 router.get('/profile', requireLoggedInCustomer, customer.profile);
 router.post('/logout', requireLoggedInCustomer, customerAuth.logout);
+router.get('/products', requireLoggedInCustomer, products.list);
+router.get('/products/:slug', requireLoggedInCustomer, products.detail);
 
 module.exports = router;

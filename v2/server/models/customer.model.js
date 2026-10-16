@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+const addressSchema = require('./address.schema');
 
-const accountSchema = new mongoose.Schema({
+const customerSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true, minlength: 2, maxlength: 80 },
   mobile: { type: String, required: true, immutable: true },
+  email: { type: String, trim: true, lowercase: true, maxlength: 254 },
   passwordHash: { type: String, required: true, select: false },
-  role: { type: String, required: true, enum: ['customer', 'owner'], immutable: true },
+  address: { type: addressSchema, default: undefined },
 }, {
   timestamps: true,
   toJSON: {
@@ -23,10 +25,6 @@ const accountSchema = new mongoose.Schema({
   },
 });
 
-accountSchema.index({ mobile: 1 }, { unique: true, name: 'unique_account_mobile' });
-accountSchema.index(
-  { role: 1 },
-  { unique: true, partialFilterExpression: { role: 'owner' }, name: 'single_owner_account' },
-);
+customerSchema.index({ mobile: 1 }, { unique: true, name: 'unique_customer_mobile' });
 
-module.exports = mongoose.models.Account || mongoose.model('Account', accountSchema);
+module.exports = mongoose.models.Customer || mongoose.model('Customer', customerSchema, 'customers');

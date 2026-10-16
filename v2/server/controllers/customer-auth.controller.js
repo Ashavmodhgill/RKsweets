@@ -1,4 +1,4 @@
-const { registerCustomer, authenticateCustomer } = require('../services/account-auth.service');
+const { registerCustomer, authenticateCustomer } = require('../services/customer-auth.service');
 const { establishAuthenticatedSession, invalidateAuthenticatedSession } = require('../services/auth-session.service');
 
 function showLogin(_req, res) {

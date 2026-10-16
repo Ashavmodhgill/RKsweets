@@ -1,4 +1,4 @@
-const { authenticateOwner } = require('../services/account-auth.service');
+const { authenticateOwner } = require('../services/owner-auth.service');
 const { establishAuthenticatedSession, invalidateAuthenticatedSession } = require('../services/auth-session.service');
 
 function showLogin(_req, res) {

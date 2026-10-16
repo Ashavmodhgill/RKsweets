@@ -1,0 +1,21 @@
+<aside class="admin-sidebar" id="admin-sidebar" aria-label="Owner navigation">
+  <a class="admin-brand" href="/" aria-label="RK Sweets dashboard">
+    <span class="brand-mark">RK</span><span><strong>RK Sweets</strong><small>OWNER PORTAL</small></span>
+  </a>
+  <p class="sidebar-label">WORKSPACE</p>
+  <nav class="admin-nav">
+    <a class="<%= activePath === '/' ? 'active' : '' %>" href="/" <%= activePath === '/' ? 'aria-current="page"' : '' %>><span class="nav-icon">⌂</span>Dashboard</a>
+    <a class="<%= activePath.startsWith('/products') ? 'active' : '' %>" href="/products" <%= activePath.startsWith('/products') ? 'aria-current="page"' : '' %>><span class="nav-icon">✦</span>Products</a>
+  </nav>
+  <p class="sidebar-label sidebar-label-spaced">OPERATIONS</p>
+  <nav class="admin-nav" aria-label="Coming soon">
+    <span class="nav-disabled"><span class="nav-icon">▤</span>Orders<small>Coming soon</small></span>
+    <span class="nav-disabled"><span class="nav-icon">▧</span>Invoices &amp; reports<small>Coming soon</small></span>
+  </nav>
+  <p class="sidebar-label sidebar-label-spaced">PREFERENCES</p>
+  <nav class="admin-nav"><span class="nav-disabled"><span class="nav-icon">⚙</span>Settings<small>Coming soon</small></span></nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-shop-note"><span class="shop-status-dot"></span><span><strong>RK Sweets</strong><small>Product catalogue</small></span></div>
+    <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="sidebar-logout" type="submit"><span class="nav-icon">↪</span>Sign out</button></form>
+  </div>
+</aside>

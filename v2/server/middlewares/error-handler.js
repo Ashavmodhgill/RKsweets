@@ -14,9 +14,12 @@ const APPLICATION_STATUS = Object.freeze({
   NOT_FOUND: 404,
   AUTH_RATE_LIMITED: 429,
   MOBILE_ALREADY_REGISTERED: 409,
+  INVALID_PRODUCT_IMAGE: 400,
+  IMAGE_UPLOAD_UNAVAILABLE: 503,
 });
 
 function getClientStatus(err) {
+  if (Number.isInteger(err?.statusCode) && err.statusCode >= 400 && err.statusCode <= 599) return err.statusCode;
   if (typeof err?.type === 'string' && BODY_PARSER_STATUS[err.type]) {
     return BODY_PARSER_STATUS[err.type];
   }
@@ -99,6 +102,8 @@ function errorHandler(err, req, res, _next) {
       : err?.code === 'NOT_FOUND' ? 'The page or endpoint could not be found.'
         : err?.code === 'AUTH_RATE_LIMITED' ? 'Too many sign-in attempts. Try again later.'
           : err?.code === 'MOBILE_ALREADY_REGISTERED' ? 'An account already uses this mobile number.'
+          : err?.code === 'INVALID_PRODUCT_IMAGE' ? (err.message || 'The selected image is not valid.')
+            : err?.code === 'IMAGE_UPLOAD_UNAVAILABLE' ? 'Image uploads are not configured. Contact the administrator.'
           : 'The request could not be processed.');
 
   if (isApiRequest(req)) {

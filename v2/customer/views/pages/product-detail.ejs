@@ -1,0 +1,16 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="storefront">
+  <%- include('../partials/store-header', { account, activePath: '/products' }) %>
+  <main class="store-main detail-main">
+    <p class="detail-back"><a href="/products">← Back to sweets</a></p>
+    <article class="product-detail">
+      <% if (product.imageUrl) { %><img class="detail-image" src="<%= product.imageUrl %>" alt="<%= product.name %>"><% } else { %><div class="detail-image image-placeholder" aria-hidden="true">RK</div><% } %>
+      <div class="detail-copy"><p class="eyebrow"><%= product.category %></p><h1><%= product.name %></h1><p class="detail-description"><%= product.description %></p><p class="detail-price">₹<%= (product.pricePaise / 100).toFixed(2) %> <span>per <%= product.unitType === 'weight' ? `${product.weightAmount} ${product.weightUnit}` : `${product.quantityPerPiece} piece` %></span></p><p class="detail-prep">Estimated preparation <strong><%= product.prepMinutes %> minutes</strong></p>
+        <% if (product.isAvailable) { %><span class="status status-live">Available</span><% } else { %><span class="status status-off">Currently unavailable</span><p class="unavailable-copy">This item is not available at the moment.</p><% } %>
+      </div>
+    </article>
+  </main>
+  <%- include('../partials/store-footer') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

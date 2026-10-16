@@ -1,12 +1,14 @@
-const Account = require('../models/account.model');
+const Customer = require('../models/customer.model');
+const Owner = require('../models/owner.model');
 
 const LOGIN_PATH = Object.freeze({ customer: '/login', owner: '/login' });
 const SESSION_COOKIE = Object.freeze({ customer: 'rk_customer.sid', owner: 'rk_admin.sid' });
 
-async function findSessionAccount(req) {
+async function findSessionAccount(req, role) {
   const accountId = req.session?.auth?.accountId;
   if (!accountId) return null;
-  return Account.findById(accountId).select('_id name mobile role').lean();
+  const Model = role === 'owner' ? Owner : Customer;
+  return Model.findById(accountId).select('_id name mobile').lean();
 }
 
 function clearSession(req, res, role, next) {
@@ -22,8 +24,8 @@ function requireRole(role) {
   if (!LOGIN_PATH[role]) throw new TypeError('Unsupported account role.');
   return async (req, res, next) => {
     try {
-      const account = await findSessionAccount(req);
-      if (!account || account.role !== role) {
+      const account = await findSessionAccount(req, role);
+      if (!account) {
         return clearSession(req, res, role, () => res.redirect(LOGIN_PATH[role]));
       }
       req.authAccount = account;
@@ -38,8 +40,8 @@ function redirectIfAuthenticated(role) {
   if (!LOGIN_PATH[role]) throw new TypeError('Unsupported account role.');
   return async (req, res, next) => {
     try {
-      const account = await findSessionAccount(req);
-      if (!account || account.role !== role) return next();
+      const account = await findSessionAccount(req, role);
+      if (!account) return next();
       req.authAccount = account;
       return res.redirect('/');
     } catch (error) {

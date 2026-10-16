@@ -1,0 +1,9 @@
+<header class="store-header">
+  <a class="store-brand" href="/" aria-label="RK Sweets home"><span class="store-brand-mark">RK</span><span><strong>RK Sweets</strong><small>MADE FOR SHARING</small></span></a>
+  <nav class="store-nav" aria-label="Store navigation">
+    <a class="<%= activePath === '/' ? 'active' : '' %>" href="/">Home</a>
+    <a class="<%= activePath.startsWith('/products') ? 'active' : '' %>" href="/products">Our sweets</a>
+    <a class="<%= activePath === '/profile' ? 'active' : '' %>" href="/profile">My account</a>
+  </nav>
+  <div class="store-account"><span class="store-greeting">Hello, <%= account.name %></span><form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit">Sign out</button></form></div>
+</header>

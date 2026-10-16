@@ -1,0 +1,28 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="admin-app">
+  <%- include('../partials/app-shell-start', { pageTitle, account, activePath: '/products' }) %>
+      <div class="page-toolbar"><p>Manage the sweets shown in your customer catalogue.</p><a class="button-primary" href="/products/new">＋ Add product</a></div>
+    <% if (notice) { %><p class="notice" role="status"><%= notice %></p><% } %>
+    <% if (!products.length) { %>
+      <section class="empty-state"><h2>No products yet</h2><p>Add your first sweet to begin building the catalogue.</p><a class="button-primary" href="/products/new">Add a product</a></section>
+    <% } else { %>
+      <section class="dashboard-panel product-management-panel"><div class="table-wrap"><table class="product-table"><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Unit</th><th>Prep</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+        <% products.forEach((product) => { %>
+          <tr>
+            <td><div class="product-cell"><% if (product.imageUrl) { %><img class="thumb" src="<%= product.imageUrl %>" alt=""><% } else { %><span class="thumb placeholder-thumb" aria-hidden="true">✦</span><% } %><span><strong><%= product.name %></strong><small><%= product.slug %></small></span></div></td>
+            <td><%= product.category %></td><td>₹<%= (product.pricePaise / 100).toFixed(2) %></td>
+            <td><%= product.unitType === 'weight' ? `${product.weightAmount} ${product.weightUnit}` : `${product.quantityPerPiece} per piece` %></td>
+            <td><%= product.prepMinutes %> min</td>
+            <td><span class="status <%= product.isAvailable ? 'status-live' : 'status-off' %>"><%= product.isAvailable ? 'Available' : 'Unavailable' %></span></td>
+            <td><div class="row-actions"><a href="/products/<%= product._id %>/edit">Edit</a>
+              <form method="post" action="/products/<%= product._id %>/availability"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="isAvailable" value="<%= product.isAvailable ? 'false' : 'true' %>"><button class="text-button" type="submit"><%= product.isAvailable ? 'Deactivate' : 'Activate' %></button></form>
+              <form method="post" action="/products/<%= product._id %>/delete" data-confirm="Delete this product? This cannot be undone."><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="text-button danger-text" type="submit">Delete</button></form>
+            </div></td>
+          </tr>
+        <% }) %>
+      </tbody></table></div></section>
+    <% } %>
+  <%- include('../partials/app-shell-end') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>
