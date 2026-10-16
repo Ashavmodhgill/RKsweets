@@ -10,7 +10,7 @@
         <% products.forEach((product) => { %>
           <tr>
             <td><div class="product-cell"><% if (product.imageUrl) { %><img class="thumb" src="<%= product.imageUrl %>" alt=""><% } else { %><span class="thumb placeholder-thumb" aria-hidden="true">✦</span><% } %><span><strong><%= product.name %></strong><small><%= product.slug %></small></span></div></td>
-            <td><%= product.category %></td><td>₹<%= (product.pricePaise / 100).toFixed(2) %></td>
+            <td><%= product.categoryId?.name || product.category || 'Unassigned category' %></td><td>₹<%= (product.pricePaise / 100).toFixed(2) %></td>
             <td><%= product.unitType === 'weight' ? `${product.weightAmount} ${product.weightUnit}` : `${product.quantityPerPiece} per piece` %></td>
             <td><%= product.prepMinutes %> min</td>
             <td><span class="status <%= product.isAvailable ? 'status-live' : 'status-off' %>"><%= product.isAvailable ? 'Available' : 'Unavailable' %></span></td>

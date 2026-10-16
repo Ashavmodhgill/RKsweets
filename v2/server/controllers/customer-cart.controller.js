@@ -1,4 +1,6 @@
 const Product = require('../models/product.model');
+const ProductCategory = require('../models/product-category.model');
+const { activeCategoryVisibilityFilter } = require('../services/product-category.service');
 const {
   addCartItem,
   isPurchasableProduct,
@@ -37,7 +39,9 @@ function show(req, res) {
 async function add(req, res, next) {
   try {
     const { productId } = req.validated.params;
-    const product = await Product.findById(productId).lean();
+    const activeCategoryIds = await ProductCategory.distinct('_id', { isActive: true });
+    const product = await Product.findOne({ _id: productId, ...activeCategoryVisibilityFilter(activeCategoryIds) })
+      .populate('categoryId', 'isActive').lean();
     if (!isPurchasableProduct(product)) {
       return res.redirect(303, '/cart?notice=unavailable');
     }
@@ -60,7 +64,9 @@ async function update(req, res, next) {
     const existing = req.session.cart?.some((item) => item.productId === productId);
     if (!existing) return res.redirect(303, '/cart?notice=notFound');
 
-    const product = await Product.findById(productId).lean();
+    const activeCategoryIds = await ProductCategory.distinct('_id', { isActive: true });
+    const product = await Product.findOne({ _id: productId, ...activeCategoryVisibilityFilter(activeCategoryIds) })
+      .populate('categoryId', 'isActive').lean();
     if (!isPurchasableProduct(product)) {
       req.session.cart = removeCartItem(req.session.cart, productId);
       return saveAndRedirect(req, res, next, 'unavailable');

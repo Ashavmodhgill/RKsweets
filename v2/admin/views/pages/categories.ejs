@@ -1,0 +1,42 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="admin-app">
+  <%- include('../partials/app-shell-start', { pageTitle, account, activePath: '/categories' }) %>
+    <div class="page-toolbar"><p>Manage the categories used by products in the customer catalogue.</p></div>
+    <% if (notice) { %><p class="notice" role="status"><%= notice %></p><% } %>
+    <% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+    <section class="dashboard-panel category-create-panel">
+      <div class="panel-heading"><div><p class="eyebrow">CATALOGUE ORGANIZATION</p><h2>Add a category</h2></div></div>
+      <form method="post" action="/categories" class="category-create-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label for="new-category-name">Category name</label>
+        <input id="new-category-name" name="name" required minlength="2" maxlength="60" value="<%= values.name || '' %>" placeholder="Traditional sweets">
+        <button class="button-primary" type="submit">Add category</button>
+      </form>
+    </section>
+    <section class="category-management-list" aria-label="Product categories">
+      <% if (!categories.length) { %>
+        <section class="empty-state"><h2>No categories yet</h2><p>Add a category before creating a new product.</p></section>
+      <% } else { %>
+        <% categories.forEach((category) => { %>
+          <article class="dashboard-panel category-management-card">
+            <div class="category-management-heading"><div><span class="status <%= category.isActive ? 'status-live' : 'status-off' %>"><%= category.isActive ? 'Active' : 'Inactive' %></span><p class="category-slug">Customer filter: <%= category.slug %></p></div></div>
+            <form method="post" action="/categories/<%= category._id %>" class="category-rename-form">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <label for="category-name-<%= category._id %>">Category name</label>
+              <input id="category-name-<%= category._id %>" name="name" required minlength="2" maxlength="60" value="<%= category.name %>">
+              <button class="button-secondary" type="submit">Save name</button>
+            </form>
+            <form method="post" action="/categories/<%= category._id %>/status" class="category-status-form">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="isActive" value="<%= category.isActive ? 'false' : 'true' %>">
+              <button class="<%= category.isActive ? 'button-danger' : 'button-secondary' %>" type="submit"><%= category.isActive ? 'Deactivate' : 'Activate' %></button>
+              <small><%= category.isActive ? 'Visible as a customer catalogue filter.' : 'Hidden from customers; products remain associated.' %></small>
+            </form>
+          </article>
+        <% }) %>
+      <% } %>
+    </section>
+  <%- include('../partials/app-shell-end') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

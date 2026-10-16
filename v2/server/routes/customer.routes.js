@@ -12,6 +12,10 @@ const orders = require('../controllers/customer-orders.controller');
 const { loadCustomerCart } = require('../middlewares/customer-cart');
 const { cartProductParamsSchema, cartQuantitySchema } = require('../validators/cart.validator');
 const { checkoutOrderSchema, customerOrderHistorySchema, orderIdParamsSchema } = require('../validators/order.validator');
+const { notificationIdParamsSchema, notificationLimitSchema } = require('../validators/notification.validator');
+const { createNotificationController } = require('../controllers/notification.controller');
+const notifications = createNotificationController('customer');
+const showReceipt = require('../controllers/order-receipt.controller').createOrderReceiptController('customer');
 
 router.get('/login', redirectIfAuthenticated('customer'), customerAuth.showLogin);
 router.post('/login', redirectIfAuthenticated('customer'), loginAttemptLimiter, validate(loginSchema), customerAuth.login);
@@ -27,7 +31,13 @@ router.post('/cart/items/:productId/update', requireLoggedInCustomer, loadCustom
 router.post('/cart/items/:productId/remove', requireLoggedInCustomer, loadCustomerCart, validate(cartProductParamsSchema, 'params'), cart.remove);
 router.get('/checkout', requireLoggedInCustomer, loadCustomerCart, orders.showCheckout);
 router.post('/checkout', requireLoggedInCustomer, loadCustomerCart, validate(checkoutOrderSchema), orders.place);
+router.get('/notifications', requireLoggedInCustomer, notifications.show);
+router.get('/notifications/feed', requireLoggedInCustomer, validate(notificationLimitSchema, 'query'), notifications.feed);
+router.get('/notifications/unread-count', requireLoggedInCustomer, notifications.unreadCount);
+router.post('/notifications/read-all', requireLoggedInCustomer, notifications.markAllRead);
+router.post('/notifications/:notificationId/read', requireLoggedInCustomer, validate(notificationIdParamsSchema, 'params'), notifications.markOneRead);
 router.get('/orders', requireLoggedInCustomer, validate(customerOrderHistorySchema, 'query'), orders.history);
+router.get('/orders/:orderId/receipt', requireLoggedInCustomer, validate(orderIdParamsSchema, 'params'), showReceipt);
 router.get('/orders/:orderId', requireLoggedInCustomer, validate(orderIdParamsSchema, 'params'), orders.confirmation);
 router.get('/products', requireLoggedInCustomer, loadCustomerCart, products.list);
 router.get('/products/:slug', requireLoggedInCustomer, loadCustomerCart, products.detail);

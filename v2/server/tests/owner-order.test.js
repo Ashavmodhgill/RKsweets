@@ -14,8 +14,9 @@ const OWNER_ID = '65a000000000000000000098';
 
 function fakeModels(status = 'pending_owner_acceptance') {
   const order = {
-    _id: ORDER_ID, status, items: [{ prepMinutes: 8 }, { prepMinutes: 22 }],
+    _id: ORDER_ID, customerId: '65a000000000000000000010', businessDate: '2026-10-17', status, items: [{ prepMinutes: 8 }, { prepMinutes: 22 }], notificationOutbox: [],
   };
+  const day = { _id: '2026-10-17', businessDate: '2026-10-17', status: 'open', workflowVersion: 0 };
   let transactionTail = Promise.resolve();
   const counter = new Map();
   const query = (value) => ({ session() { return this; }, lean: async () => value ? structuredClone(value) : null });
@@ -27,7 +28,11 @@ function fakeModels(status = 'pending_owner_acceptance') {
         ? acceptedStatus.$in.includes(order.status)
         : order.status === acceptedStatus;
       if (!allowed) return query(null);
-      Object.assign(order, update.$set);
+      Object.assign(order, update.$set || {});
+      if (update.$push?.notificationOutbox) {
+        const pushed = update.$push.notificationOutbox.$each || [update.$push.notificationOutbox];
+        order.notificationOutbox = [...(order.notificationOutbox || []), ...pushed];
+      }
       return query(order);
     },
   };
@@ -36,6 +41,17 @@ function fakeModels(status = 'pending_owner_acceptance') {
       const value = (counter.get(filter._id) || 0) + update.$inc.value;
       counter.set(filter._id, value);
       return { value };
+    },
+  };
+  const BusinessDayModel = {
+    findOneAndUpdate(filter, update) {
+      const allowed = filter.status === day.status
+        || (Array.isArray(filter.status?.$in) && filter.status.$in.includes(day.status));
+      return { lean: async () => {
+        if (filter._id !== day._id || !allowed) return null;
+        day.workflowVersion += update.$inc.workflowVersion;
+        return structuredClone(day);
+      } };
     },
   };
   const startSession = async () => ({
@@ -48,7 +64,7 @@ function fakeModels(status = 'pending_owner_acceptance') {
     },
     endSession: async () => {},
   });
-  return { order, counter, OrderModel, CounterModel, startSession };
+  return { order, day, counter, OrderModel, BusinessDayModel, CounterModel, startSession };
 }
 
 test('daily token date follows BUSINESS_TIMEZONE and prep suggestion uses max item snapshot', () => {
@@ -83,6 +99,8 @@ test('acceptance allocates one token, snapshots estimate and adjustment reason, 
   assert.equal(first.order.confirmedPrepMinutes, 30);
   assert.equal(first.order.prepTimeConfirmedAt.toISOString(), input.now.toISOString());
   assert.equal(first.order.prepTimeAdjustmentReason, 'Large batch');
+  assert.equal(first.order.notificationOutbox.length, 3);
+  assert.ok(first.order.notificationOutbox.every((event) => event.recipientType === 'customer'));
   assert.equal(second.transitioned, false);
   assert.equal(second.order.officialToken, 1);
   assert.equal(deps.counter.get('2026-10-17'), 1);
@@ -101,21 +119,36 @@ test('concurrent duplicate accept requests converge on one acceptance and one to
   assert.equal(deps.counter.get('2026-10-17'), 1);
 });
 
+test('owner acceptance is blocked during closing before token allocation', async () => {
+  const deps = fakeModels();
+  deps.day.status = 'closing';
+  await assert.rejects(acceptOrder({
+    ...deps, orderId: ORDER_ID, ownerId: OWNER_ID, timeZone: 'Asia/Kolkata', confirmedPrepMinutes: 22,
+  }), { code: 'BUSINESS_DAY_NOT_OPEN' });
+  assert.equal(deps.order.status, 'pending_owner_acceptance');
+  assert.equal(deps.counter.size, 0);
+});
+
 test('a concurrent rejection wins against a stale acceptance and token allocation is rolled back', async () => {
   const deps = fakeModels();
   let orderRead;
   let resumeAcceptance;
+  let hasPausedAcceptance = false;
   const readReached = new Promise((resolve) => { orderRead = resolve; });
   const acceptanceGate = new Promise((resolve) => { resumeAcceptance = resolve; });
   const findById = deps.OrderModel.findById.bind(deps.OrderModel);
   deps.OrderModel.findById = (id) => {
     const query = findById(id);
+    let usesTransaction = false;
     return {
-      session() { return this; },
+      session() { usesTransaction = true; return this; },
       async lean() {
         const snapshot = await query.lean();
-        orderRead();
-        await acceptanceGate;
+        if (usesTransaction && !hasPausedAcceptance) {
+          hasPausedAcceptance = true;
+          orderRead();
+          await acceptanceGate;
+        }
         return snapshot;
       },
     };
@@ -161,8 +194,23 @@ test('rejection requires a reason and only transitions pending orders', async ()
   assert.equal(rejected.transitioned, true);
   assert.equal(rejected.order.status, 'rejected');
   assert.equal(rejected.order.rejectionReason, 'Kitchen closed');
+  assert.equal(rejected.order.notificationOutbox.at(-1).eventType, 'order_rejected');
+  assert.match(rejected.order.notificationOutbox.at(-1).message, /Kitchen closed/);
   const duplicate = await rejectOrder({ ...deps, orderId: ORDER_ID, ownerId: OWNER_ID, reason: 'Again' });
   assert.equal(duplicate.transitioned, false);
+});
+
+test('pending rejection and active-order completion remain available during closing', async () => {
+  const pending = fakeModels();
+  pending.day.status = 'closing';
+  const rejected = await rejectOrder({ ...pending, orderId: ORDER_ID, ownerId: OWNER_ID, reason: 'Kitchen closed' });
+  assert.equal(rejected.transitioned, true);
+
+  const accepted = fakeModels('accepted');
+  accepted.day.status = 'closing';
+  const completed = await completeOrder({ ...accepted, orderId: ORDER_ID, ownerId: OWNER_ID });
+  assert.equal(completed.transitioned, true);
+  assert.equal(completed.order.status, 'completed');
 });
 
 test('completion is limited to accepted workflow states', async () => {
@@ -174,6 +222,7 @@ test('completion is limited to accepted workflow states', async () => {
   assert.equal(done.transitioned, true);
   assert.equal(done.order.status, 'completed');
   assert.ok(done.order.completedAt instanceof Date);
+  assert.equal(done.order.notificationOutbox.at(-1).eventType, 'order_completed');
 });
 
 test('owner authorization resolves an Owner record and redirects sessions without one', async () => {

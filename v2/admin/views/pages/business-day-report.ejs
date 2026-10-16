@@ -1,0 +1,13 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="admin-app">
+  <%- include('../partials/app-shell-start', { pageTitle, account, activePath: '/business-days/reports' }) %>
+    <a class="order-back-link" href="/business-days/reports">← All reports</a>
+    <section class="business-day-heading"><div><p class="eyebrow">FINALIZED REPORT</p><h2><%= day.businessDate %></h2><p>Opened <%= new Date(day.report.openedAt).toLocaleString() %> · Closed <%= new Date(day.report.closedAt).toLocaleString() %></p></div><span class="business-day-status status status-closed">Closed</span></section>
+    <section class="business-day-metrics metric-grid"><article class="metric-card"><div><p>Total orders</p><strong><%= day.report.totalOrderCount %></strong></div></article><article class="metric-card"><div><p>Gross order value</p><strong>₹<%= (day.report.grossOrderValuePaise / 100).toFixed(2) %></strong><small>Persisted order snapshots</small></div></article><article class="metric-card"><div><p>Tokens issued</p><strong><%= day.report.officialTokens.length %></strong><small><%= day.report.officialTokens.length ? day.report.officialTokens.map((entry) => `${entry.tokenDate} · ${entry.token}`).join(', ') : 'None' %></small></div></article></section>
+    <section class="dashboard-panel business-day-report-section"><h2>Order outcomes</h2><div class="business-day-status-grid"><% Object.entries(day.report.statusCounts.toObject ? day.report.statusCounts.toObject() : day.report.statusCounts).forEach(([key, count]) => { %><div><span><%= statusLabels[key] || key %></span><strong><%= count %></strong></div><% }) %></div><p>Accepted: <strong><%= day.report.acceptedOrderCount %></strong> · Rejected: <strong><%= day.report.rejectedOrderCount %></strong> · Completed: <strong><%= day.report.completedOrderCount %></strong></p></section>
+    <section class="dashboard-panel business-day-report-section"><h2>Fulfilment totals</h2><div class="business-day-status-grid"><% [['pickup', 'Pickup'], ['dine_in', 'Dine-in']].forEach(([key, label]) => { const value = day.report.fulfilmentTotals[key]; %><div><span><%= label %></span><strong><%= value.orderCount %> orders</strong><small>₹<%= (value.grossOrderValuePaise / 100).toFixed(2) %></small></div><% }) %></div></section>
+    <section class="dashboard-panel business-day-report-section"><h2>Payment report</h2><p><strong>Paid sales: Not recorded.</strong> RK Sweets collects payment in person, and no verified payment-recording mechanism is implemented. <%= day.report.paidSalesExcludedOrderCount %> orders are excluded from a paid-sales total.</p></section>
+  <%- include('../partials/app-shell-end') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

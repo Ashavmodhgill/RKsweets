@@ -1,11 +1,14 @@
 const crypto = require('node:crypto');
 const mongoose = require('mongoose');
 const Product = require('../models/product.model');
+const ProductCategory = require('../models/product-category.model').ProductCategory;
 const { uploadProductImage, deleteProductImage } = require('../services/cloudinary-image.service');
+const { resolveProductCategory } = require('../services/product-category.service');
 const { productFields } = require('../validators/product.validator');
 
 const fieldsForForm = (product = {}) => ({
-  name: product.name || '', description: product.description || '', category: product.category || '',
+  name: product.name || '', description: product.description || '',
+  categoryId: product.categoryId?._id ? String(product.categoryId._id) : (product.categoryId ? String(product.categoryId) : ''),
   priceRupees: Number.isInteger(product.pricePaise) ? (product.pricePaise / 100).toFixed(2) : '',
   unitType: product.unitType || 'piece', weightAmount: product.weightAmount || '',
   weightUnit: product.weightUnit || 'g', quantityPerPiece: product.quantityPerPiece || 1,
@@ -18,11 +21,21 @@ function messageFor(error) {
   return 'The request could not be completed. Please try again.';
 }
 
-function renderForm(res, { product, values, errors = [], error, status = 200, account }) {
+function renderForm(res, { product, values, errors = [], error, status = 200, account, categories = [], currentCategory = null }) {
   return res.status(status).render('admin/views/pages/product-form', {
     pageTitle: product ? 'Edit product' : 'Add product', product, account,
-    values: values || fieldsForForm(product), errors, error,
+    values: values || fieldsForForm(product), errors, error, categories, currentCategory,
   });
+}
+
+async function categoryFormState(product) {
+  const [categories, currentCategory] = await Promise.all([
+    ProductCategory.find({ isActive: true }).sort({ name: 1 }).lean(),
+    product?.categoryId
+      ? ProductCategory.findById(product.categoryId._id || product.categoryId).lean()
+      : null,
+  ]);
+  return { categories, currentCategory };
 }
 
 function slugBase(name) {
@@ -79,7 +92,7 @@ function uploadImage(req, res, next) {
 
 async function list(req, res, next) {
   try {
-    const products = await Product.find().sort({ updatedAt: -1, name: 1 }).lean();
+    const products = await Product.find().populate('categoryId', 'name slug isActive').sort({ updatedAt: -1, name: 1 }).lean();
     const notices = {
       created: 'Product added.', updated: 'Product updated.', deleted: 'Product deleted.',
       activated: 'Product is now available.', deactivated: 'Product is now unavailable.',
@@ -91,21 +104,33 @@ async function list(req, res, next) {
   } catch (error) { return next(error); }
 }
 
-function newForm(req, res) { return renderForm(res, { account: req.authAccount }); }
+async function newForm(req, res, next) {
+  try {
+    const state = await categoryFormState(null);
+    return renderForm(res, { ...state, account: req.authAccount });
+  } catch (error) { return next(error); }
+}
 
 async function create(req, res, next) {
   const values = req.body || {};
-  const parsed = productFields.safeParse(values);
-  if (!parsed.success) return renderForm(res, {
-    values, errors: parsed.error.issues.map((issue) => ({ path: issue.path[0], message: issue.message })), status: 400, account: req.authAccount,
-  });
   try {
-    const { name, ...allowed } = parsed.data;
+    const state = await categoryFormState(null);
+    if (!state.categories.length) return renderForm(res, {
+      ...state, values, error: 'Add and activate a product category before creating a product.',
+      status: 409, account: req.authAccount,
+    });
+    const parsed = productFields.safeParse(values);
+    if (!parsed.success) return renderForm(res, {
+      ...state, values, errors: parsed.error.issues.map((issue) => ({ path: issue.path[0], message: issue.message })),
+      status: 400, account: req.authAccount,
+    });
+    const { name, categoryId, ...allowed } = parsed.data;
+    const validatedCategoryId = await resolveProductCategory({ categoryId });
     const uploadId = typeof values.imageUploadId === 'string' ? values.imageUploadId : '';
     const staged = uploadId ? getStaged(req, uploadId) : null;
-    if (uploadId && !staged) return renderForm(res, { values, error: 'The uploaded image has expired. Please choose it again.', status: 400, account: req.authAccount });
+    if (uploadId && !staged) return renderForm(res, { ...state, values, error: 'The uploaded image has expired. Please choose it again.', status: 400, account: req.authAccount });
     const product = new Product({
-      name, ...allowed, slug: await uniqueSlug(name),
+      name, ...allowed, categoryId: validatedCategoryId, slug: await uniqueSlug(name),
       ...(staged ? { imageUrl: staged.imageUrl, imagePublicId: staged.imagePublicId } : {}),
     });
     await product.save();
@@ -115,7 +140,8 @@ async function create(req, res, next) {
     }
     return res.redirect('/products?notice=created');
   } catch (error) {
-    return renderForm(res, { values, error: messageFor(error), status: error?.code === 11000 ? 409 : 400, account: req.authAccount });
+    const state = await categoryFormState(null).catch(() => ({ categories: [], currentCategory: null }));
+    return renderForm(res, { ...state, values, error: typeof error.code === 'string' && error.code.startsWith('CATEGORY_') ? error.message : messageFor(error), status: ['CATEGORY_DUPLICATE', 'CATEGORY_INACTIVE'].includes(error.code) || error?.code === 11000 ? 409 : 400, account: req.authAccount });
   }
 }
 
@@ -128,7 +154,8 @@ async function loadForEdit(req, res, next) {
     if (!product) return res.status(404).render('server/views/shared/error', {
       pageTitle: 'Product not found', statusCode: 404, message: 'That product could not be found.', details: [], portalPath: '/',
     });
-    return renderForm(res, { product, account: req.authAccount });
+    const state = await categoryFormState(product);
+    return renderForm(res, { ...state, product, account: req.authAccount });
   } catch (error) { return next(error); }
 }
 
@@ -137,13 +164,18 @@ async function update(req, res, next) {
   if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).render('server/views/shared/error', {
     pageTitle: 'Product not found', statusCode: 404, message: 'That product could not be found.', details: [], portalPath: '/',
   });
-  const existingProduct = await Product.findById(req.params.id).lean();
+  let existingProduct;
+  let state;
+  try {
+    existingProduct = await Product.findById(req.params.id).lean();
+    state = await categoryFormState(existingProduct);
+  } catch (error) { return next(error); }
   if (!existingProduct) return res.status(404).render('server/views/shared/error', {
     pageTitle: 'Product not found', statusCode: 404, message: 'That product could not be found.', details: [], portalPath: '/',
   });
   const parsed = productFields.safeParse(values);
   if (!parsed.success) return renderForm(res, {
-    values, errors: parsed.error.issues.map((issue) => ({ path: issue.path[0], message: issue.message })), status: 400,
+    ...state, values, errors: parsed.error.issues.map((issue) => ({ path: issue.path[0], message: issue.message })), status: 400,
     product: existingProduct, account: req.authAccount,
   });
   try {
@@ -151,14 +183,16 @@ async function update(req, res, next) {
     if (!product) return res.status(404).render('server/views/shared/error', {
       pageTitle: 'Product not found', statusCode: 404, message: 'That product could not be found.', details: [], portalPath: '/',
     });
-    const { name, ...allowed } = parsed.data;
+    const { name, categoryId, ...allowed } = parsed.data;
+    const resolvedCategoryId = await resolveProductCategory({ categoryId, existingProduct });
     const uploadId = typeof values.imageUploadId === 'string' ? values.imageUploadId : '';
     const staged = uploadId ? getStaged(req, uploadId) : null;
     if (uploadId && !staged) return renderForm(res, {
-      product, values, error: 'The uploaded image has expired. Please choose it again.', status: 400, account: req.authAccount,
+      ...state, product, values, error: 'The uploaded image has expired. Please choose it again.', status: 400, account: req.authAccount,
     });
     const oldPublicId = product.imagePublicId;
     Object.assign(product, allowed, { name, slug: await uniqueSlug(name, product._id) });
+    if (resolvedCategoryId) product.categoryId = resolvedCategoryId;
     if (staged) Object.assign(product, { imageUrl: staged.imageUrl, imagePublicId: staged.imagePublicId });
     await product.save();
     if (staged) {
@@ -172,8 +206,8 @@ async function update(req, res, next) {
     }
     return res.redirect('/products?notice=updated');
   } catch (error) {
-    const product = await Product.findById(req.params.id).lean().catch(() => null);
-    return renderForm(res, { product, values, error: messageFor(error), status: error?.code === 11000 ? 409 : 400, account: req.authAccount });
+    const product = await Product.findById(req.params.id).lean().catch(() => existingProduct);
+    return renderForm(res, { ...state, product, values, error: typeof error.code === 'string' && error.code.startsWith('CATEGORY_') ? error.message : messageFor(error), status: ['CATEGORY_DUPLICATE', 'CATEGORY_INACTIVE'].includes(error.code) || error?.code === 11000 ? 409 : 400, account: req.authAccount });
   }
 }
 

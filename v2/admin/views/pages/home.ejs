@@ -15,7 +15,7 @@
         <% if (recentProducts.length) { %><div class="recent-products">
           <% recentProducts.forEach((product) => { %><article class="recent-product">
             <% if (product.imageUrl) { %><img src="<%= product.imageUrl %>" alt=""><% } else { %><span class="recent-placeholder" aria-hidden="true">RK</span><% } %>
-            <div class="recent-product-info"><strong><%= product.name %></strong><small><%= product.category %> · Updated <%= new Date(product.updatedAt).toLocaleDateString() %></small></div>
+            <div class="recent-product-info"><strong><%= product.name %></strong><small><%= product.categoryId?.name || product.category || 'Unassigned category' %> · Updated <%= new Date(product.updatedAt).toLocaleDateString() %></small></div>
             <span class="status <%= product.isAvailable ? 'status-live' : 'status-off' %>"><%= product.isAvailable ? 'Available' : 'Unavailable' %></span>
             <a class="row-edit" href="/products/<%= product._id %>/edit">Edit</a>
           </article><% }) %>

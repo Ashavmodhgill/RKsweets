@@ -9,7 +9,16 @@
       <input type="hidden" name="imageUploadId" id="image-upload-id" value="">
       <label>Product name<input name="name" required minlength="2" maxlength="100" value="<%= values.name %>"></label>
       <label class="form-span">Description<textarea name="description" required maxlength="2000" rows="4"><%= values.description %></textarea></label>
-      <label>Category<input name="category" required maxlength="60" value="<%= values.category %>" placeholder="Traditional sweets"></label>
+      <% const existingCategoryId = product && product.categoryId ? String(product.categoryId) : ''; const selectedCategoryId = values.categoryId || existingCategoryId; const preserveLegacyCategory = Boolean(product && !existingCategoryId && product.category && !values.categoryId); %>
+      <label for="product-category">Category</label>
+      <select id="product-category" name="categoryId" <%= product && !existingCategoryId ? '' : 'required' %> <%= !categories.length && !product ? 'disabled' : '' %>>
+        <option value="" <%= selectedCategoryId || preserveLegacyCategory ? '' : 'selected' %>><%= categories.length ? 'Choose a category' : 'No active categories available' %></option>
+        <% categories.forEach((category) => { %><option value="<%= category._id %>" <%= selectedCategoryId === String(category._id) ? 'selected' : '' %>><%= category.name %></option><% }) %>
+        <% if (currentCategory && !currentCategory.isActive) { %><option value="<%= currentCategory._id %>" <%= selectedCategoryId === String(currentCategory._id) ? 'selected' : '' %>><%= currentCategory.name %> (inactive — preserved unless replaced)</option><% } else if (existingCategoryId && !currentCategory) { %><option value="<%= existingCategoryId %>" <%= selectedCategoryId === existingCategoryId ? 'selected' : '' %>>Unresolved category reference (preserved unless replaced)</option><% } %>
+        <% if (product && !existingCategoryId && product.category) { %><option value="" <%= preserveLegacyCategory ? 'selected' : '' %>>Legacy category: <%= product.category %> (preserved until migrated or replaced)</option><% } %>
+      </select>
+      <% if (!categories.length) { %><small class="category-form-help"><a href="/categories">Add or activate a category</a> before creating products. Existing product categories remain unchanged.</small><% } %>
+      <% if (currentCategory && !currentCategory.isActive) { %><small class="category-form-help">This product’s category is inactive. It is preserved for this edit; choose an active category to replace it.</small><% } else if (product && !existingCategoryId && product.category) { %><small class="category-form-help">This product still has a legacy text category. It remains unchanged until migration or you choose a dedicated category.</small><% } %>
       <label>Price (INR)<input name="priceRupees" required inputmode="decimal" pattern="\d{1,8}(\.\d{1,2})?" value="<%= values.priceRupees %>" placeholder="250.00"></label>
       <label>Sold by<select name="unitType" id="unit-type"><option value="piece" <%= values.unitType === 'piece' ? 'selected' : '' %>>Piece</option><option value="weight" <%= values.unitType === 'weight' ? 'selected' : '' %>>Weight</option></select></label>
       <div class="unit-fields" data-unit="weight"><label>Weight amount<input name="weightAmount" type="number" min="1" max="10000" value="<%= values.weightAmount %>"></label><label>Weight unit<select name="weightUnit"><option value="g" <%= values.weightUnit === 'g' ? 'selected' : '' %>>Grams</option><option value="kg" <%= values.weightUnit === 'kg' ? 'selected' : '' %>>Kilograms</option></select></label></div>
@@ -17,7 +26,7 @@
       <label>Estimated preparation time (minutes)<input name="prepMinutes" type="number" min="0" max="1440" step="1" required value="<%= values.prepMinutes %>"></label>
       <section class="image-upload form-span"><label for="product-image">Product image <small>JPEG, PNG, or WebP · max 4 MiB</small></label><input id="product-image" type="file" accept="image/jpeg,image/png,image/webp"><p id="image-status" role="status"><%= product && product.imageUrl ? 'Current image will be kept unless you choose a replacement.' : 'No image selected.' %></p><% if (product && product.imageUrl) { %><img class="form-image" src="<%= product.imageUrl %>" alt="Current product"><% } %></section>
       <p class="form-error upload-error form-span" id="upload-error" hidden role="alert"></p>
-      <div class="form-actions form-span"><button class="button-primary" type="submit"><%= product ? 'Save changes' : 'Create product' %></button><a href="/products">Cancel</a></div>
+      <div class="form-actions form-span"><button class="button-primary" type="submit" <%= !categories.length && !product ? 'disabled' : '' %>><%= product ? 'Save changes' : 'Create product' %></button><a href="/products">Cancel</a></div>
     </form></section>
   <%- include('../partials/app-shell-end') %>
   <%- include('../partials/foot', { assetPrefix: '/assets' }) %>

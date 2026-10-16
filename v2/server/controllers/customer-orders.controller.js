@@ -1,9 +1,14 @@
 const crypto = require('node:crypto');
 const DiningTable = require('../models/dining-table.model');
 const Order = require('../models/order.model');
+const BusinessDay = require('../models/business-day.model');
 const Product = require('../models/product.model');
+const ProductCategory = require('../models/product-category.model');
+const { activeCategoryVisibilityFilter } = require('../services/product-category.service');
 const { buildCartView } = require('../services/customer-cart.service');
 const { ORDER_STATUS } = require('../constants/order-status');
+const { businessDateFor } = require('../services/business-day.service');
+const { dispatchOrderOutbox } = require('../services/notification.service');
 const {
   clearCartAfterPersistedOrder,
   findCustomerOrder,
@@ -48,7 +53,7 @@ async function resolveDiningTable(req, qrTableNumber) {
   return { table, invalidQr: false };
 }
 
-function renderCheckout(req, res, { status = 200, errorMessage = '', diningTable = null, invalidQr = false } = {}) {
+function renderCheckout(req, res, { status = 200, errorMessage = '', diningTable = null, invalidQr = false, orderingOpen = true } = {}) {
   return res.status(status).render('customer/views/pages/checkout', {
     pageTitle: 'Checkout',
     account: req.authAccount,
@@ -56,6 +61,7 @@ function renderCheckout(req, res, { status = 200, errorMessage = '', diningTable
     checkoutKey: req.session.checkoutKey,
     diningTable,
     invalidQr,
+    orderingOpen,
     errorMessage,
   });
 }
@@ -63,13 +69,17 @@ function renderCheckout(req, res, { status = 200, errorMessage = '', diningTable
 async function showCheckout(req, res, next) {
   try {
     const { table, invalidQr } = await resolveDiningTable(req, req.query.table);
+    const openDay = await BusinessDay.findOne({ status: 'open' }).select('_id').lean();
     if (!req.customerCart.items.length) return res.redirect(303, '/cart?notice=emptyCheckout');
     req.session.checkoutKey = crypto.randomUUID();
     req.session.checkoutQuote = cartQuote(req.customerCart);
     return renderCheckout(req, res, {
       diningTable: table,
       invalidQr,
-      errorMessage: invalidQr ? 'That table QR is not active. Choose pickup or scan a current table QR.' : '',
+      orderingOpen: Boolean(openDay),
+      errorMessage: !openDay
+        ? 'Ordering is currently closed. The owner must open the business day before orders can be placed.'
+        : (invalidQr ? 'That table QR is not active. Choose pickup or scan a current table QR.' : ''),
     });
   } catch (error) {
     return next(error);
@@ -95,8 +105,10 @@ async function place(req, res, next) {
       });
     }
 
+    const activeCategoryIds = await ProductCategory.distinct('_id', { isActive: true });
     const products = req.customerCart.cart.length
-      ? await Product.find({ _id: { $in: req.customerCart.cart.map((line) => line.productId) } }).lean()
+      ? await Product.find({ _id: { $in: req.customerCart.cart.map((line) => line.productId) }, ...activeCategoryVisibilityFilter(activeCategoryIds) })
+        .populate('categoryId', 'isActive').lean()
       : [];
     const freshCart = buildCartView(req.customerCart.cart, products);
     const currentQuote = cartQuote(freshCart);
@@ -129,9 +141,12 @@ async function place(req, res, next) {
       }
     }
 
+    const openDay = await BusinessDay.findOne({ status: 'open' }).select('businessDate').lean();
     const result = await placeCustomerOrder({
       OrderModel: Order,
+      BusinessDayModel: BusinessDay,
       customerId,
+      businessDate: openDay?.businessDate || businessDateFor(new Date(), req.app.locals.businessTimezone),
       idempotencyKey,
       customer: req.authAccount,
       cartLines: freshCart.cart,
@@ -139,14 +154,16 @@ async function place(req, res, next) {
       fulfillmentMethod,
       diningTable,
     });
+    await dispatchOrderOutbox(result.order._id);
     return finishOrder(req, res, result.order._id);
   } catch (error) {
-    if (['CART_EMPTY', 'ORDER_INVALID_CART', 'ORDER_CART_CHANGED', 'ORDER_TABLE_REQUIRED', 'ORDER_TOTAL_INVALID'].includes(error.code)) {
+    if (['CART_EMPTY', 'ORDER_INVALID_CART', 'ORDER_CART_CHANGED', 'ORDER_TABLE_REQUIRED', 'ORDER_TOTAL_INVALID', 'BUSINESS_DAY_NOT_OPEN'].includes(error.code)) {
       const { table } = await resolveDiningTable(req).catch(() => ({ table: null }));
       return renderCheckout(req, res, {
         status: 409,
         diningTable: table,
         errorMessage: error.message,
+        orderingOpen: error.code !== 'BUSINESS_DAY_NOT_OPEN',
       });
     }
     return next(error);

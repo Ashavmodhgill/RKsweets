@@ -10,6 +10,7 @@
       </a>
 
     <a class="<%= activePath.startsWith('/orders') ? 'active' : '' %>" href="/orders">My orders</a>
+    <a class="store-notification-link <%= activePath.startsWith('/notifications') ? 'active' : '' %>" href="/notifications" aria-label="Notifications"><span aria-hidden="true">♢</span><span class="notification-link-label">Alerts</span><span class="notification-badge" data-notification-count data-notification-count-url="/notifications/unread-count" aria-live="polite" hidden>0</span></a>
     <a class="<%= activePath === '/profile' ? 'active' : '' %>" href="/profile">My account</a>
   </nav>
   <div class="store-account"><span class="store-greeting">Hello, <%= account.name %></span><form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit">Sign out</button></form></div>

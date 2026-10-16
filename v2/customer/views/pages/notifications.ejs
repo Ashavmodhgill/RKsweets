@@ -1,0 +1,16 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="storefront">
+  <%- include('../partials/store-header', { account, activePath: '/notifications' }) %>
+  <main class="store-main notification-center customer-notification-center">
+    <header class="notification-center-heading"><p class="eyebrow">YOUR ACCOUNT</p><h1>Notifications</h1><p id="notification-refresh-status" role="status" aria-live="polite">Loading unread count…</p></header>
+    <% if (notifications.some((notification) => !notification.readAt)) { %><form method="post" action="/notifications/read-all" class="mark-all-form"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="notification-action">Mark all as read</button></form><% } %>
+    <% if (!notifications.length) { %><section class="notification-empty"><span aria-hidden="true">♢</span><h2>You’re all caught up</h2><p>Order updates will appear here.</p></section><% } else { %>
+      <section class="notification-list" aria-label="Your notifications">
+        <% notifications.forEach((notification) => { %><article class="notification-card <%= notification.readAt ? 'is-read' : 'is-unread' %>"><div class="notification-copy"><p class="notification-event"><%= notification.eventType.replaceAll('_', ' ') %></p><h2><%= notification.title %></h2><p><%= notification.message %></p><time datetime="<%= notification.createdAt.toISOString() %>"><%= new Date(notification.createdAt).toLocaleString() %></time><a class="notification-order-link" href="<%= notification.orderUrl %>">View my order <span aria-hidden="true">→</span></a></div><% if (!notification.readAt) { %><form method="post" action="/notifications/<%= notification._id %>/read"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="notification-action">Mark read</button></form><% } else { %><span class="notification-read-label">Read</span><% } %></article><% }) %>
+      </section>
+    <% } %>
+  </main>
+  <%- include('../partials/store-footer') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="storefront receipt-page">
+  <%- include('../partials/store-header', { account, activePath: '/orders' }) %>
+  <main class="store-main receipt-main">
+    <div class="receipt-screen-actions"><a class="customer-order-link" href="/orders/<%= order._id %>">← Back to order</a><button type="button" class="store-button" data-print-page>Print receipt</button></div>
+    <%- include('../../../server/views/shared/order-receipt-content', { order, items, restaurant, paymentLabel, isOwner }) %>
+  </main>
+  <%- include('../partials/store-footer') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

@@ -5,7 +5,7 @@ async function home(req, res, next) {
     const [totalProducts, availableProducts, recentProducts] = await Promise.all([
       Product.countDocuments(),
       Product.countDocuments({ isAvailable: true }),
-      Product.find().sort({ updatedAt: -1 }).limit(6).lean(),
+      Product.find().populate('categoryId', 'name isActive').sort({ updatedAt: -1 }).limit(6).lean(),
     ]);
     return res.render('admin/views/pages/home', {
       pageTitle: 'Dashboard', account: req.authAccount,

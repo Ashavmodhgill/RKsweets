@@ -1,6 +1,9 @@
 const crypto = require('node:crypto');
 const mongoose = require('mongoose');
+const BusinessDay = require('../models/business-day.model');
+const { touchOpenBusinessDay } = require('./business-day.service');
 const { MAX_ITEM_QUANTITY, isPurchasableProduct, productUnitLabel } = require('./customer-cart.service');
+const { ownerOrderPlacedEvent } = require('../constants/notification-events');
 const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
 
 function orderCartLines(cartLines) {
@@ -104,23 +107,41 @@ function clearCartAfterPersistedOrder(session, order) {
 
 async function placeCustomerOrder({
   OrderModel,
+  BusinessDayModel = BusinessDay,
   customerId,
+  businessDate,
   idempotencyKey,
   customer,
   cartLines,
   products,
   fulfillmentMethod,
   diningTable,
+  startSession = () => mongoose.startSession(),
 }) {
   const orderId = orderIdFor(customerId, idempotencyKey);
   const existing = await findExistingOrder(OrderModel, orderId, customerId);
   if (existing) return { order: existing, created: false };
 
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(businessDate || '')) {
+    throw codedError('BUSINESS_DAY_NOT_OPEN', 'Ordering is currently closed. Please try again after the owner opens the business day.');
+  }
+
   const snapshot = makeOrderSnapshot({
     customerId, customer, cartLines, products, fulfillmentMethod, diningTable,
   });
+  const session = await startSession();
   try {
-    const order = await OrderModel.create({ _id: orderId, ...snapshot });
+    let order;
+    await session.withTransaction(async () => {
+      await touchOpenBusinessDay({ date: businessDate, BusinessDayModel, session });
+      const [created] = await OrderModel.create([{
+        _id: orderId,
+        ...snapshot,
+        businessDate,
+        notificationOutbox: [ownerOrderPlacedEvent({ _id: orderId })],
+      }], { session });
+      order = created;
+    }, { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } });
     return { order, created: true };
   } catch (error) {
     // The deterministic order id is backed by MongoDB's built-in _id uniqueness.
@@ -129,6 +150,8 @@ async function placeCustomerOrder({
       if (duplicate) return { order: duplicate, created: false };
     }
     throw error;
+  } finally {
+    await session.endSession();
   }
 }
 

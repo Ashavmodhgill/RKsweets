@@ -13,6 +13,7 @@ const OTHER_CUSTOMER_ID = '65a000000000000000000011';
 const PRODUCT_ID = '65a000000000000000000001';
 const TABLE_ID = '65a000000000000000000020';
 const KEY = 'f41e5539-5e75-4b4f-bdc3-f9e19863f671';
+const BUSINESS_DATE = '2026-10-16';
 const customer = { name: 'Riya Shah', mobile: '+919876543210' };
 const product = {
   _id: PRODUCT_ID,
@@ -38,7 +39,7 @@ function fakeOrderModel({ failCreate = false } = {}) {
         return record && String(record.customerId) === String(filter.customerId) ? record : null;
       } };
     },
-    async create(record) {
+    async create([record]) {
       if (failCreate) throw new Error('database write failed');
       const key = String(record._id);
       if (records.has(key)) {
@@ -48,10 +49,29 @@ function fakeOrderModel({ failCreate = false } = {}) {
       }
       const saved = { ...record, _id: record._id, createdAt: new Date('2026-10-16T00:00:00.000Z') };
       records.set(key, saved);
-      return saved;
+      return [saved];
     },
   };
 }
+
+function fakeBusinessDayModel(status = 'open') {
+  const day = { _id: BUSINESS_DATE, businessDate: BUSINESS_DATE, status, workflowVersion: 0 };
+  return {
+    findOneAndUpdate(filter, update) {
+      return { lean: async () => {
+        if (filter._id !== BUSINESS_DATE || filter.status !== 'open' || day.status !== 'open') return null;
+        day.workflowVersion += update.$inc.workflowVersion;
+        return day;
+      } };
+    },
+  };
+}
+const BusinessDayModel = fakeBusinessDayModel();
+const startSession = async () => ({
+  withTransaction: async (callback) => callback(),
+  endSession: async () => {},
+});
+const dayDeps = { BusinessDayModel, businessDate: BUSINESS_DATE, startSession };
 
 test('order snapshots recalculate current price and retain item, unit, and prep information in paise', () => {
   const snapshot = makeOrderSnapshot({
@@ -111,15 +131,20 @@ test('dine-in snapshots require an active configured table and store only its ve
 test('duplicate submissions resolve to one persisted order even if catalogue data later changes', async () => {
   const OrderModel = fakeOrderModel();
   const first = await placeCustomerOrder({
+    ...dayDeps,
     OrderModel, customerId: CUSTOMER_ID, idempotencyKey: KEY, customer,
     cartLines: lines, products: [product], fulfillmentMethod: 'pickup',
   });
   const duplicate = await placeCustomerOrder({
+    ...dayDeps,
     OrderModel, customerId: CUSTOMER_ID, idempotencyKey: KEY, customer,
     cartLines: [], products: [], fulfillmentMethod: 'pickup',
   });
 
   assert.equal(first.created, true);
+  assert.equal(first.order.notificationOutbox[0].eventType, 'order_placed');
+  assert.equal(first.order.notificationOutbox[0].recipientType, 'owner');
+  assert.equal(first.order.notificationOutbox[0].eventKey, `${String(first.order._id)}:order_placed`);
   assert.equal(duplicate.created, false);
   assert.equal(String(first.order._id), String(duplicate.order._id));
   assert.equal(OrderModel.records.size, 1);
@@ -129,6 +154,7 @@ test('duplicate submissions resolve to one persisted order even if catalogue dat
 test('concurrent double submissions converge on one order', async () => {
   const OrderModel = fakeOrderModel();
   const input = {
+    ...dayDeps,
     OrderModel, customerId: CUSTOMER_ID, idempotencyKey: KEY, customer,
     cartLines: lines, products: [product], fulfillmentMethod: 'pickup',
   };
@@ -144,6 +170,7 @@ test('concurrent double submissions converge on one order', async () => {
 test('cart is retained when order persistence fails and clears only after an order is persisted', async () => {
   const session = { cart: [...lines], checkoutKey: KEY };
   await assert.rejects(placeCustomerOrder({
+    ...dayDeps,
     OrderModel: fakeOrderModel({ failCreate: true }), customerId: CUSTOMER_ID, idempotencyKey: KEY,
     customer, cartLines: lines, products: [product], fulfillmentMethod: 'pickup',
   }), /database write failed/);
@@ -152,6 +179,7 @@ test('cart is retained when order persistence fails and clears only after an ord
   assert.deepEqual(session.cart, lines);
 
   const savedOrder = (await placeCustomerOrder({
+    ...dayDeps,
     OrderModel: fakeOrderModel(), customerId: CUSTOMER_ID, idempotencyKey: KEY,
     customer, cartLines: lines, products: [product], fulfillmentMethod: 'pickup',
   })).order;
@@ -160,9 +188,23 @@ test('cart is retained when order persistence fails and clears only after an ord
   assert.equal(session.checkoutKey, undefined);
 });
 
+test('checkout is rejected when the business day is closing and the cart remains untouched', async () => {
+  const OrderModel = fakeOrderModel();
+  const session = { cart: [...lines], checkoutKey: KEY };
+  await assert.rejects(placeCustomerOrder({
+    ...dayDeps, BusinessDayModel: fakeBusinessDayModel('closing'), OrderModel,
+    customerId: CUSTOMER_ID, idempotencyKey: KEY, customer, cartLines: lines,
+    products: [product], fulfillmentMethod: 'pickup',
+  }), { code: 'BUSINESS_DAY_NOT_OPEN' });
+  assert.equal(OrderModel.records.size, 0);
+  assert.deepEqual(session.cart, lines);
+  assert.equal(session.checkoutKey, KEY);
+});
+
 test('order lookup includes the authenticated customer ID to enforce ownership', async () => {
   const OrderModel = fakeOrderModel();
   const saved = await placeCustomerOrder({
+    ...dayDeps,
     OrderModel, customerId: CUSTOMER_ID, idempotencyKey: KEY, customer,
     cartLines: lines, products: [product], fulfillmentMethod: 'pickup',
   });

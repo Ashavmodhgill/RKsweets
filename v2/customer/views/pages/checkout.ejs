@@ -42,7 +42,8 @@
             <% } %>
             <div class="checkout-payment"><strong>Pay in person</strong><p>Pickup orders are paid at the counter. For dine-in, pay with staff at the shop.</p></div>
             <div class="checkout-total"><span>Order total</span><strong>₹<%= (cart.totalPaise / 100).toFixed(2) %></strong></div>
-            <button class="store-button checkout-submit" type="submit">Place order</button>
+            <button class="store-button checkout-submit" type="submit" <%= orderingOpen ? '' : 'disabled' %>>Place order</button>
+            <% if (!orderingOpen) { %><p class="checkout-pending-note">Orders will be available after the owner opens the business day.</p><% } %>
             <p class="checkout-pending-note">Your order will be sent to the owner for manual acceptance. No token is issued until it is accepted.</p>
           </form>
         </aside>

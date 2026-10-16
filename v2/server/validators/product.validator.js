@@ -6,7 +6,7 @@ const integerString = (min, max) => z.string().trim().regex(/^\d+$/, 'Enter a wh
 const productFields = z.object({
   name: z.string().trim().min(2).max(100),
   description: z.string().trim().min(1).max(2000),
-  category: z.string().trim().min(1).max(60),
+  categoryId: z.string().trim().regex(/^[a-f\d]{24}$/i).optional().default(''),
   priceRupees: z.string().trim().regex(/^\d{1,8}(?:\.\d{1,2})?$/, 'Enter a valid INR price.')
     .transform((value) => Math.round(Number(value) * 100)).pipe(z.number().int().min(0).max(100000000)),
   unitType: z.enum(['piece', 'weight']),
@@ -32,7 +32,7 @@ const productFields = z.object({
 }).transform((data) => ({
   name: data.name,
   description: data.description,
-  category: data.category,
+  categoryId: data.categoryId || '',
   pricePaise: data.priceRupees,
   unitType: data.unitType,
   ...(data.unitType === 'weight'

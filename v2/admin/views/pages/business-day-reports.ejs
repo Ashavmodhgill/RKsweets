@@ -1,0 +1,11 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="admin-app">
+  <%- include('../partials/app-shell-start', { pageTitle, account, activePath: '/business-days/reports' }) %>
+    <div class="page-toolbar"><p>Finalized daily reports are immutable snapshots.</p><a class="inline-link" href="/business-days">Business Day dashboard</a></div>
+    <% if (!days.length) { %><section class="empty-state"><h2>No finalized reports yet</h2><p>A report appears here after the owner closes a business day.</p></section><% } else { %>
+      <section class="business-day-report-list"><% days.forEach((day) => { %><article class="dashboard-panel business-day-report-card"><div><p class="eyebrow">CLOSED <%= new Date(day.closedAt).toLocaleString() %></p><h2><a href="/business-days/reports/<%= day.businessDate %>"><%= day.businessDate %></a></h2><p><%= day.report.totalOrderCount %> orders · <%= day.report.completedOrderCount %> completed</p></div><div><span>Gross order value</span><strong>₹<%= (day.report.grossOrderValuePaise / 100).toFixed(2) %></strong><small>Paid sales not recorded</small></div><a class="button-secondary" href="/business-days/reports/<%= day.businessDate %>">View report</a></article><% }) %></section>
+    <% } %>
+  <%- include('../partials/app-shell-end') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

@@ -1,5 +1,18 @@
 const mongoose = require('mongoose');
 const { ORDER_STATUS, ORDER_STATUSES } = require('../constants/order-status');
+const { NOTIFICATION_EVENTS } = require('../constants/notification-events');
+
+const orderNotificationOutboxSchema = new mongoose.Schema({
+  eventKey: { type: String, required: true, immutable: true },
+  recipientType: { type: String, required: true, enum: ['owner', 'customer'], immutable: true },
+  recipientId: { type: mongoose.Schema.Types.ObjectId, immutable: true },
+  eventType: { type: String, required: true, enum: NOTIFICATION_EVENTS, immutable: true },
+  title: { type: String, required: true, trim: true, maxlength: 100, immutable: true },
+  message: { type: String, required: true, trim: true, maxlength: 500, immutable: true },
+  orderToken: { type: Number, min: 1, validate: Number.isSafeInteger, immutable: true },
+  createdAt: { type: Date, required: true, immutable: true },
+  deliveredAt: { type: Date, default: null },
+}, { _id: false, strict: 'throw' });
 
 const orderItemSchema = new mongoose.Schema({
   productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true, immutable: true },
@@ -22,6 +35,7 @@ const orderSchema = new mongoose.Schema({
     required: true,
     immutable: true,
   },
+  businessDate: { type: String, match: /^\d{4}-\d{2}-\d{2}$/, immutable: true },
   items: { type: [orderItemSchema], required: true, validate: (items) => items.length > 0, immutable: true },
   fulfillmentMethod: { type: String, required: true, enum: ['pickup', 'dine_in'], immutable: true },
   tableSnapshot: {
@@ -54,6 +68,7 @@ const orderSchema = new mongoose.Schema({
   rejectionReason: { type: String, trim: true, maxlength: 500 },
   completedAt: { type: Date },
   completedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Owner' },
+  notificationOutbox: { type: [orderNotificationOutboxSchema], default: [] },
 }, { timestamps: true, strict: 'throw' });
 
 orderSchema.index({ customerId: 1, createdAt: -1 }, { name: 'customer_order_history' });
@@ -63,6 +78,12 @@ orderSchema.index({ tokenDate: 1, officialToken: 1 }, {
   name: 'unique_daily_official_order_token',
 });
 orderSchema.index({ status: 1, createdAt: -1 }, { name: 'owner_order_queue' });
+orderSchema.index({ businessDate: 1, status: 1, createdAt: 1 }, { name: 'business_day_order_report' });
+orderSchema.index({
+  'notificationOutbox.recipientType': 1,
+  'notificationOutbox.recipientId': 1,
+  'notificationOutbox.deliveredAt': 1,
+}, { name: 'pending_order_notification_outbox' });
 
 orderSchema.pre('validate', function validateOwnerDecision() {
   const hasToken = Number.isSafeInteger(this.officialToken) && this.officialToken > 0 && Boolean(this.tokenDate);

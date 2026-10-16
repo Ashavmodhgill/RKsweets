@@ -1,0 +1,16 @@
+<article class="receipt-document">
+  <header class="receipt-brand"><p class="receipt-brand-mark">RK</p><h1><%= restaurant.name %></h1><p>Order Receipt</p>
+    <% if (restaurant.phone) { %><p><%= restaurant.phone %></p><% } %>
+    <% if (restaurant.address) { %><p><%= [restaurant.address.line1, restaurant.address.line2, restaurant.address.city, restaurant.address.region, restaurant.address.postalCode, restaurant.address.country].filter(Boolean).join(', ') %></p><% } %>
+  </header>
+  <section class="receipt-order-meta"><div><span>Order placed</span><strong><%= new Date(order.createdAt).toLocaleString() %></strong></div><div><span>Official token</span><strong><%= order.tokenDisplay || 'Not yet issued' %></strong></div><div><span>Status</span><strong><%= order.statusLabel %></strong></div><div><span>Fulfilment</span><strong><%= order.fulfillmentLabel %></strong></div></section>
+  <% if (order.customerSnapshot) { %><section class="receipt-customer"><h2><%= isOwner ? 'Customer' : 'Order for' %></h2><p><strong><%= order.customerSnapshot.name %></strong><% if (order.customerSnapshot.mobile) { %><br><%= order.customerSnapshot.mobile %><% } %></p></section><% } %>
+  <table class="receipt-items"><thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Line total</th></tr></thead><tbody>
+    <% items.forEach((item) => { %><tr><td><strong><%= item.name %></strong><small><%= item.unitLabel %></small></td><td><%= item.quantity %></td><td><%= item.unitPrice %></td><td><%= item.lineTotal %></td></tr><% }) %>
+  </tbody></table>
+  <section class="receipt-total"><div><span>Order total</span><strong><%= order.totalFormatted %></strong></div></section>
+  <% if (Number.isSafeInteger(order.confirmedPrepMinutes)) { %><section class="receipt-note"><strong>Confirmed preparation estimate:</strong> <%= order.confirmedPrepMinutes %> minutes. This is an estimate, not an exact ready-time promise.</section><% } %>
+  <% if (order.rejectionReason) { %><section class="receipt-note"><strong>Owner's note:</strong> <%= order.rejectionReason %></section><% } %>
+  <p class="receipt-payment"><strong><%= paymentLabel %></strong> Order completion does not mean payment has been received.</p>
+  <footer class="receipt-footer">Thank you for choosing <%= restaurant.name %>.</footer>
+</article>

@@ -13,7 +13,7 @@ V2 is a server-rendered application using Node.js, Express, EJS, and MongoDB Atl
 - Mutating requests require a session CSRF token in a form `_csrf` field or the `x-csrf-token` header.
 - MongoDB connection and required environment values are checked before the HTTP listener starts.
 
-Phase 2 provides customer account registration/login, owner login, logout, customer profile, and protected portal routes. Phase 3 provides owner product management and a customer-facing product catalogue. Phase 4.1 provides an authenticated customer cart. Phase 4.2 adds customer checkout and pending orders. Phase 4.3 adds owner order acceptance, rejection, and completion; online payment is not implemented.
+Phase 2 provides customer account registration/login, owner login, logout, customer profile, and protected portal routes. Phase 3 provides owner product management and a customer-facing product catalogue. Phase 4.1 provides an authenticated customer cart. Phase 4.2 adds customer checkout and pending orders. Phase 4.3 adds owner order acceptance, rejection, and completion. Phase 4.4 adds in-app notifications and printable order receipts; online payment is not implemented.
 
 ## Phase 2 authentication foundation
 
@@ -76,13 +76,51 @@ v2/
 
 Each server mounts only its portal at `/`; the admin and customer areas are separated by port and process. No domain ownership or DNS configuration is assumed.
 
+## Product categories
+
+Owners manage product categories at `/categories` in the admin portal. Category creation and renaming normalize Unicode, surrounding whitespace, repeated spaces, and case for duplicate detection. Category slugs remain stable after a rename; active status controls customer visibility. Categories are deactivated rather than deleted, so product associations are retained. Product creation uses an active-category dropdown. Editing preserves an existing inactive or legacy category until the owner explicitly selects an active replacement. New product creation is blocked while no active category exists.
+
+The customer home and catalogue filters read active categories from `product_categories` and filter products server-side by the category reference. A category with no matching products remains selectable and shows an empty state. Products referencing inactive categories are hidden from the catalogue and product detail routes; they are also excluded from cart and checkout reads. Products still carrying only the legacy text field remain visible until migrated, but are not included in category-specific filters.
+
+### Legacy category migration (not run automatically)
+
+The existing `products.category` string is retained as a legacy field. The migration adds `categoryId` references without unsetting or rewriting that string. Before any migration, confirm the intended local/staging database, take a restorable backup, and inspect the existing product and category collections and indexes. Do not run these commands against an unconfirmed or production target.
+
+From `server/`, first create/verify the required indexes, then run a dry-run report:
+
+```powershell
+npm run setup:product-category-indexes
+npm run migrate:product-categories
+```
+
+Review scanned products, planned category mappings, normalized aliases, blank/missing values, and ambiguous references or slug collisions. The migration refuses to write if missing or ambiguous values are reported. After correcting those records and reviewing the report, apply the migration explicitly:
+
+```powershell
+npm run migrate:product-categories -- --apply
+npm run migrate:product-categories
+```
+
+The migration is idempotent: a second run should report no remaining legacy products to reference. Verify product/category reference counts and sample customer/admin views against the target data. Keep `products.category` until a separately reviewed verification confirms every required product is correctly mapped and a later cleanup plan is approved. This feature does not remove the legacy field or change historical order/receipt snapshots.
+
+## Business day opening and closing
+
+Owners manage the business day from **Business Day** in the admin sidebar. Opening and closing are explicit owner actions. The configured `BUSINESS_TIMEZONE` determines the date used when the owner opens a day. An open day continues across a server restart and is not automatically closed or replaced at midnight. Customers cannot place orders unless the active day is open; pending orders cannot be accepted after closing starts. During closing, the owner can still reject pending orders and complete accepted/preparing/ready orders. Finalization is blocked until those orders are resolved.
+
+Closed-day reports snapshot order counts by the existing order statuses, accepted/rejected/completed counts, gross order value in integer paise from persisted order price snapshots, fulfilment totals, and issued tokens. Gross order value is not collected sales. Payment remains in person, so paid sales are reported as **not recorded**; completion is not evidence of payment. The report does not read current product prices.
+
+Before using the workflow on a controlled database, take a backup and confirm the target database. The deployment must support MongoDB multi-document transactions (a replica set or sharded cluster; a standalone MongoDB server is insufficient). Review existing orders that lack `businessDate`, especially unresolved orders, before enabling the feature. Then run `npm run setup:business-day-indexes` from `server/` against the confirmed target. This creates the unique business-date and single-active-day indexes, plus the order business-date/status index. Resolve any duplicate or conflicting data reported by index creation before enabling writes. No setup script is run by the application automatically.
+
+Checkout, owner acceptance/token allocation, order resolution, closing, and report finalization write the same business-day record within transactions. This serializes their state changes with the open/closing/closed transition. The code and mocked tests do not verify real transaction behavior or index creation; deploy only after validating them in a safe replica-set staging environment. Historical orders created before this feature have no business-day association and are not retroactively assigned or included in a day report. Unresolved legacy orders block opening until resolved.
+
+Run `npm run check` and `npm test` from `server/` for local checks. Migration and index commands connect to the configured `MONGODB_URI` when run; they were not run as part of implementation.
+
 ## Phase 3 product catalogue
 
 The owner can manage products at `/products` on the admin portal. Mutations use the owner session and CSRF protection. Customers with an account can browse the catalogue at `/products` on the customer portal; only public catalogue fields are rendered there. Product prices are stored as integer paise. Weight products use an amount and `g`/`kg` unit; piece products use a quantity-per-piece value. Unavailable products remain visible with an unavailable status.
 
 Images are uploaded server-to-server to Cloudinary using Node's built-in `fetch`, `FormData`, `Blob`, and crypto APIs; no Cloudinary SDK or additional package is required. The server accepts JPEG, PNG, and WebP files up to 4 MiB, checks their content signatures, and stages image metadata in the owner session. The secure URL and Cloudinary public ID are saved only with the product record. Replacing or deleting a product commits the database change before requesting cleanup of the old Cloudinary image; cleanup failures can leave an unreferenced Cloudinary image that should be reviewed separately.
 
-No products are seeded or migrated by this feature. The `products` collection and its indexes are managed by Mongoose; production index creation remains subject to the existing deployment/index-management process.
+Phase 3 did not seed or migrate product records. The `products` collection and its indexes are managed by Mongoose; production index creation remains subject to the existing deployment/index-management process. The separate category-reference migration is documented above.
 
 ## Phase 4.1 customer cart
 
@@ -97,3 +135,13 @@ Order placement reloads products, checks the checkout quote, calculates totals i
 ## Phase 4.3 owner order management
 
 Owner order management is available at `/orders` on the admin portal. Customers can access their own order history at `/orders` and their order details at `/orders/:orderId`. Acceptance is an atomic status transition that allocates a unique sequential numeric token for the order's local business date; numbering resets daily in `BUSINESS_TIMEZONE`. Acceptance and token allocation use a MongoDB transaction, so the production database must support transactions (MongoDB Atlas replica sets do). The checkout index setup command ensures the token-counter collection exists before transaction use; run `npm run setup:checkout-indexes` from `server/` against the intended database during deployment/index setup. The preparation suggestion is the maximum `prepMinutes` snapshot among ordered items, treating item preparation as parallel; it is an operational estimate only, not a queue prediction or exact completion promise. Owners may confirm another whole-minute estimate up to 1440 minutes and must record a reason for a changed value. Customers see the official token and confirmed estimate only after acceptance, or the owner's rejection reason if rejected. Only accepted, preparing, or ready orders may be marked completed.
+
+## Phase 4.4 notifications and receipts
+
+Both authenticated portals provide `/notifications`, an unread-count badge, and in-app notification updates. The badge checks for updates every 25 seconds while the page is visible and pauses while hidden. Notifications are stored per owner/customer recipient; customer queries are scoped to the signed-in customer. Order events are first persisted in an embedded order outbox alongside order placement or owner status transitions, then delivered idempotently to the notification collection. A failed delivery leaves the outbox event pending for a later retry when that recipient checks notifications. Owner events cover new orders; customer events cover acceptance and token/estimate confirmation, rejection with its reason, and completion. The schema contains a `ready` status, but the current owner workflow has no transition to it, so this implementation does not add one or emit a ready notification. If a ready transition is added in a later approved workflow change, it should append the existing ready event to the outbox atomically.
+
+Customers can print their own order receipt at `/orders/:orderId/receipt`; owners can print an order receipt at the same path on the admin portal. Receipts use persisted item and price snapshots and display amounts in INR from integer paise. They do not assert that payment was received and include no tax/legal invoice fields. The checkout index setup command also creates notification indexes; it must only be run against the explicitly selected deployment database as part of a planned index operation. No new environment variables are required.
+
+Run the existing checks from `server/` with `npm run check` and `npm test`. Browser rendering/printing and MongoDB index/outbox delivery behavior require separate portal and database verification; these checks do not run automatically as part of the local mocked test suite.
+
+Manual portal verification: sign in to the customer portal, place a test order, and confirm the customer notification center shows only that customer's updates and that the order receipt shows the persisted item snapshots and unpaid wording. Sign in separately to the owner portal, confirm the new-order notification links to the owner order page, then accept and reject separate test orders and verify the resulting customer notifications. Mark a notification read and confirm its unread badge decreases. Open a customer's receipt from their order page and use the print button; verify the printed page contains the receipt but not portal navigation. Confirm an authenticated customer receives not-found for another customer's order/receipt URL. Database verification requires a separately approved local/staging MongoDB target; inspect existing collections and indexes first, then schedule `npm run setup:checkout-indexes` from `server/` only after confirming the target and backup/rollback plan. This task did not run that command.

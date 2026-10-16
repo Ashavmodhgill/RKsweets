@@ -7,6 +7,7 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const DiningTable = require('../models/dining-table.model');
 const Order = require('../models/order.model');
 const OrderTokenCounter = require('../models/order-token-counter.model');
+const Notification = require('../models/notification.model');
 const { connectDatabase } = require('../config/database');
 
 async function setupCheckoutIndexes(source = process.env) {
@@ -18,8 +19,8 @@ async function setupCheckoutIndexes(source = process.env) {
     await connectDatabase(source.MONGODB_URI);
     const counterExists = await mongoose.connection.db.listCollections({ name: 'order_token_counters' }).hasNext();
     if (!counterExists) await OrderTokenCounter.createCollection();
-    await Promise.all([DiningTable.createIndexes(), Order.createIndexes()]);
-    console.info('Checkout, dining table, and order token indexes created successfully.');
+    await Promise.all([DiningTable.createIndexes(), Order.createIndexes(), Notification.createIndexes()]);
+    console.info('Checkout, order-token, and notification indexes created successfully.');
   } finally {
     await mongoose.disconnect();
   }
@@ -27,7 +28,7 @@ async function setupCheckoutIndexes(source = process.env) {
 
 if (require.main === module) {
   setupCheckoutIndexes().catch(() => {
-    console.error('Checkout index setup failed. Check database availability and resolve duplicate table numbers or existing token conflicts before retrying.');
+    console.error('Checkout index setup failed. Check database availability and resolve duplicate table numbers, order-token conflicts, or duplicate notification event keys before retrying.');
     process.exitCode = 1;
   });
 }

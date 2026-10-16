@@ -70,6 +70,8 @@ function productUnitLabel(product) {
 
 function isPurchasableProduct(product) {
   return product?.isAvailable === true
+    && !(product.categoryId && typeof product.categoryId === 'object'
+      && 'isActive' in product.categoryId && product.categoryId.isActive !== true)
     && productUnitLabel(product) !== null
     && Number.isSafeInteger(product.pricePaise)
     && product.pricePaise >= 0;

@@ -17,6 +17,7 @@
       </section>
       <div class="order-status-line confirmation-total"><span>Total · pay in person</span><strong>₹<%= (order.totalPaise / 100).toFixed(2) %></strong></div>
       <p class="confirmation-payment">Pickup is paid at the counter. For dine-in, pay with staff at the shop.</p>
+      <a class="store-button" href="/orders/<%= order._id %>/receipt">View order receipt <span aria-hidden="true">→</span></a>
       <a class="store-button" href="/orders">View my orders <span aria-hidden="true">→</span></a>
       <a class="store-button" href="/products">Continue shopping <span aria-hidden="true">→</span></a>
     </section>

@@ -4,6 +4,7 @@
     <header class="admin-topbar">
       <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false" id="admin-menu-toggle">☰</button>
       <div class="topbar-title"><p class="eyebrow">OWNER WORKSPACE</p><h1><%= pageTitle %></h1></div>
+      <a class="admin-notification-link" href="/notifications" aria-label="Owner notifications"><span aria-hidden="true">♢</span><span>Notifications</span><span class="notification-badge" data-notification-count data-notification-count-url="/notifications/unread-count" aria-live="polite" hidden>0</span></a>
       <div class="shop-identity"><span class="identity-mark">RK</span><span><strong>RK Sweets</strong><small><%= account ? account.name : 'Owner portal' %></small></span></div>
     </header>
     <main class="admin-content">
