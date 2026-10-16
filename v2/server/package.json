@@ -15,6 +15,7 @@
     "check": "node scripts/check-syntax.js",
     "setup:checkout-indexes": "node scripts/setup-checkout-indexes.js",
     "setup:business-day-indexes": "node scripts/setup-business-day-indexes.js",
+    "setup:dining-indexes": "node scripts/setup-dining-indexes.js",
     "setup:product-category-indexes": "node scripts/setup-product-category-indexes.js",
     "migrate:product-categories": "node scripts/migrate-product-categories.js",
     "setup:customer-indexes": "node scripts/setup-customer-indexes.js",

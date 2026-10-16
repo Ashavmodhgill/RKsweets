@@ -42,6 +42,7 @@ const orderSchema = new mongoose.Schema({
     type: new mongoose.Schema({
       tableId: { type: mongoose.Schema.Types.ObjectId, ref: 'DiningTable', required: true, immutable: true },
       tableNumber: { type: String, required: true, maxlength: 32, immutable: true },
+      visitId: { type: mongoose.Schema.Types.ObjectId, ref: 'DiningVisit', required: true, immutable: true },
     }, { _id: false, strict: 'throw' }),
     default: undefined,
     immutable: true,
@@ -79,6 +80,8 @@ orderSchema.index({ tokenDate: 1, officialToken: 1 }, {
 });
 orderSchema.index({ status: 1, createdAt: -1 }, { name: 'owner_order_queue' });
 orderSchema.index({ businessDate: 1, status: 1, createdAt: 1 }, { name: 'business_day_order_report' });
+orderSchema.index({ 'tableSnapshot.visitId': 1, status: 1, createdAt: 1 }, { name: 'dining_visit_order_history' });
+orderSchema.index({ 'tableSnapshot.tableId': 1, status: 1, createdAt: -1 }, { name: 'dining_table_order_history' });
 orderSchema.index({
   'notificationOutbox.recipientType': 1,
   'notificationOutbox.recipientId': 1,

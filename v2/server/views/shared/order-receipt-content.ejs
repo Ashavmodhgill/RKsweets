@@ -1,5 +1,5 @@
 <article class="receipt-document">
-  <header class="receipt-brand"><p class="receipt-brand-mark">RK</p><h1><%= restaurant.name %></h1><p>Order Receipt</p>
+  <header class="receipt-brand"><img class="receipt-brand-logo" src="/assets/images/logo.png" alt="RK Sweets logo"><h1><%= restaurant.name %></h1><p>Order Receipt</p>
     <% if (restaurant.phone) { %><p><%= restaurant.phone %></p><% } %>
     <% if (restaurant.address) { %><p><%= [restaurant.address.line1, restaurant.address.line2, restaurant.address.city, restaurant.address.region, restaurant.address.postalCode, restaurant.address.country].filter(Boolean).join(', ') %></p><% } %>
   </header>

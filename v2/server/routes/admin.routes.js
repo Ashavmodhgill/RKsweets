@@ -18,6 +18,8 @@ const notifications = createNotificationController('owner');
 const showReceipt = require('../controllers/order-receipt.controller').createOrderReceiptController('owner');
 const businessDays = require('../controllers/business-day.controller');
 const { businessDateParamsSchema, businessDayConfirmSchema } = require('../validators/business-day.validator');
+const dining = require('../controllers/dining.controller');
+const { diningClearSchema, diningTableParamsSchema, diningTableSchema, diningTableStatusSchema } = require('../validators/dining.validator');
 
 router.get('/login', redirectIfAuthenticated('owner'), adminAuth.showLogin);
 router.post('/login', redirectIfAuthenticated('owner'), loginAttemptLimiter, validate(loginSchema), adminAuth.login);
@@ -52,6 +54,13 @@ router.post('/business-days/close', requireOwner, validate(businessDayConfirmSch
 router.post('/business-days/finalize', requireOwner, validate(businessDayConfirmSchema), businessDays.finalize);
 router.get('/business-days/reports', requireOwner, businessDays.reports);
 router.get('/business-days/reports/:businessDate', requireOwner, validate(businessDateParamsSchema, 'params'), businessDays.report);
+
+router.get('/dining', requireOwner, dining.index);
+router.post('/dining/tables', requireOwner, validate(diningTableSchema), dining.create);
+router.post('/dining/tables/:tableId/rename', requireOwner, validate(diningTableParamsSchema, 'params'), validate(diningTableSchema), dining.rename);
+router.post('/dining/tables/:tableId/status', requireOwner, validate(diningTableParamsSchema, 'params'), validate(diningTableStatusSchema), dining.activate);
+router.post('/dining/tables/:tableId/qr', requireOwner, validate(diningTableParamsSchema, 'params'), dining.regenerateQr);
+router.post('/dining/tables/:tableId/clear', requireOwner, validate(diningTableParamsSchema, 'params'), validate(diningClearSchema), dining.clear);
 
 router.get('/orders', requireOwner, validate(ownerOrderFilterSchema, 'query'), ownerOrders.list);
 router.get('/orders/:orderId', requireOwner, validate(orderIdParamsSchema, 'params'), ownerOrders.detail);

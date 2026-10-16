@@ -4,7 +4,7 @@
   <main class="store-main">
     <section class="store-hero">
       <div class="hero-copy"><p class="eyebrow">A LITTLE SWEETNESS FOR EVERY MOMENT</p><h1>Welcome back,<br><span><%= account.name %>.</span></h1><p>Explore the RK Sweets collection and find something special to share.</p><a class="store-button" href="/products">Explore the sweets <span aria-hidden="true">→</span></a></div>
-      <div class="hero-art" aria-hidden="true"><span class="hero-sun"></span><span class="hero-monogram">RK</span><span class="hero-caption">MADE WITH CARE</span></div>
+      <div class="hero-art"><span class="hero-sun" aria-hidden="true"></span><img class="hero-monogram" src="/assets/images/logo.png" alt="RK Sweets logo"><span class="hero-caption" aria-hidden="true">MADE WITH CARE</span></div>
     </section>
     <% if (categories.length) { %><section class="store-section category-section"><div class="section-title"><div><p class="eyebrow">FROM THE COUNTER</p><h2>Browse by category</h2></div><a class="text-link" href="/products">See all sweets →</a></div><div class="category-chips"><% categories.forEach((category) => { %><a href="/products?category=<%= encodeURIComponent(category.slug) %>"><span>✦</span><%= category.name %></a><% }) %></div></section><% } %>
     <section class="store-section featured-section"><div class="section-title"><div><p class="eyebrow">FRESH FROM THE CATALOGUE</p><h2>Available sweets</h2><p class="section-subtitle">Recently updated items in the shop.</p></div><a class="text-link" href="/products">Browse the full catalogue →</a></div>

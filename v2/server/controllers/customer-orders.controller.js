@@ -25,31 +25,25 @@ function cartQuote(cart) {
   })));
 }
 
-async function resolveDiningTable(req, qrTableNumber) {
-  if (typeof qrTableNumber === 'string' && qrTableNumber.trim()) {
-    if (qrTableNumber.trim().length > 32) {
-      delete req.session.dineInTableId;
-      return { table: null, invalidQr: true };
-    }
-    const table = await DiningTable.findOne({
-      tableNumber: qrTableNumber.trim(),
-      isActive: true,
-    }).lean();
-    if (!table) {
-      delete req.session.dineInTableId;
-      return { table: null, invalidQr: true };
-    }
-    req.session.dineInTableId = String(table._id);
-    return { table, invalidQr: false };
-  }
-
+async function resolveDiningTable(req) {
   const tableId = req.session.dineInTableId;
+  const credentialDigest = req.session.dineInCredentialHash;
   if (typeof tableId !== 'string' || !/^[a-f\d]{24}$/i.test(tableId)) {
     delete req.session.dineInTableId;
+    delete req.session.dineInCredentialHash;
+    delete req.session.dineInVisitId;
+    delete req.session.dineInTableVersion;
     return { table: null, invalidQr: false };
   }
-  const table = await DiningTable.findOne({ _id: tableId, isActive: true }).lean();
-  if (!table) delete req.session.dineInTableId;
+  const table = typeof credentialDigest === 'string'
+    ? await DiningTable.findOne({ _id: tableId, isActive: true, qrCredentialHash: credentialDigest }).select('+qrCredentialHash').lean()
+    : null;
+  if (!table) {
+    delete req.session.dineInTableId;
+    delete req.session.dineInCredentialHash;
+    delete req.session.dineInVisitId;
+    delete req.session.dineInTableVersion;
+  }
   return { table, invalidQr: false };
 }
 
@@ -68,7 +62,7 @@ function renderCheckout(req, res, { status = 200, errorMessage = '', diningTable
 
 async function showCheckout(req, res, next) {
   try {
-    const { table, invalidQr } = await resolveDiningTable(req, req.query.table);
+    const { table, invalidQr } = await resolveDiningTable(req);
     const openDay = await BusinessDay.findOne({ status: 'open' }).select('_id').lean();
     if (!req.customerCart.items.length) return res.redirect(303, '/cart?notice=emptyCheckout');
     req.session.checkoutKey = crypto.randomUUID();
@@ -92,7 +86,7 @@ async function place(req, res, next) {
     const customerId = req.authAccount._id;
     const orderId = orderIdFor(customerId, idempotencyKey);
     const alreadyPlaced = await findCustomerOrder(Order, orderId, customerId);
-    if (alreadyPlaced) return finishOrder(req, res, alreadyPlaced._id);
+    if (alreadyPlaced) return finishOrder(req, res, alreadyPlaced);
 
     if (req.session.checkoutKey !== idempotencyKey || !req.session.checkoutQuote) {
       const { table } = await resolveDiningTable(req);
@@ -127,10 +121,8 @@ async function place(req, res, next) {
 
     let diningTable = null;
     if (fulfillmentMethod === 'dine_in') {
-      const tableId = req.session.dineInTableId;
-      diningTable = typeof tableId === 'string'
-        ? await DiningTable.findOne({ _id: tableId, isActive: true }).lean()
-        : null;
+      const resolved = await resolveDiningTable(req);
+      diningTable = resolved.table;
       if (!diningTable) {
         const { table } = await resolveDiningTable(req);
         return renderCheckout(req, res, {
@@ -145,6 +137,7 @@ async function place(req, res, next) {
     const result = await placeCustomerOrder({
       OrderModel: Order,
       BusinessDayModel: BusinessDay,
+      DiningTableModel: DiningTable,
       customerId,
       businessDate: openDay?.businessDate || businessDateFor(new Date(), req.app.locals.businessTimezone),
       idempotencyKey,
@@ -153,11 +146,13 @@ async function place(req, res, next) {
       products,
       fulfillmentMethod,
       diningTable,
+      expectedVisitId: req.session.dineInVisitId || null,
+      expectedTableVersion: req.session.dineInTableVersion,
     });
     await dispatchOrderOutbox(result.order._id);
-    return finishOrder(req, res, result.order._id);
+    return finishOrder(req, res, result.order);
   } catch (error) {
-    if (['CART_EMPTY', 'ORDER_INVALID_CART', 'ORDER_CART_CHANGED', 'ORDER_TABLE_REQUIRED', 'ORDER_TOTAL_INVALID', 'BUSINESS_DAY_NOT_OPEN'].includes(error.code)) {
+    if (['CART_EMPTY', 'ORDER_INVALID_CART', 'ORDER_CART_CHANGED', 'ORDER_TABLE_REQUIRED', 'ORDER_TOTAL_INVALID', 'BUSINESS_DAY_NOT_OPEN', 'DINING_QR_INVALID', 'DINING_TABLE_IN_USE', 'DINING_VISIT_CONFLICT', 'DINING_VISIT_CHANGED'].includes(error.code)) {
       const { table } = await resolveDiningTable(req).catch(() => ({ table: null }));
       return renderCheckout(req, res, {
         status: 409,
@@ -170,8 +165,9 @@ async function place(req, res, next) {
   }
 }
 
-function finishOrder(req, res, orderId) {
-  clearCartAfterPersistedOrder(req.session, { _id: orderId });
+function finishOrder(req, res, order) {
+  const orderId = order._id;
+  clearCartAfterPersistedOrder(req.session, order);
   return req.session.save((error) => {
     if (error) return res.app.get('env') === 'development'
       ? res.status(500).render('server/views/shared/error', {

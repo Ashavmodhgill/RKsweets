@@ -19,7 +19,7 @@ async function login(req, res, next) {
       });
     }
     await establishAuthenticatedSession(req, account);
-    return res.redirect(303, '/');
+    return res.redirect(303, req.session.dineInTableId ? '/checkout' : '/');
   } catch (error) {
     return next(error);
   }
@@ -29,7 +29,7 @@ async function register(req, res, next) {
   try {
     const account = await registerCustomer(req.validated.body);
     await establishAuthenticatedSession(req, account);
-    return res.redirect(303, '/');
+    return res.redirect(303, req.session.dineInTableId ? '/checkout' : '/');
   } catch (error) {
     if (error.code === 'MOBILE_ALREADY_REGISTERED') {
       return res.status(409).render('customer/views/pages/register', {

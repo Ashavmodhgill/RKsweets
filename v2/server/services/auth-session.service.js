@@ -6,7 +6,13 @@ function sessionOperation(session, method) {
 
 async function establishAuthenticatedSession(req, account) {
   if (!req.session || !account?._id) throw new Error('A session and account identity are required.');
+  const diningContext = ['dineInTableId', 'dineInCredentialHash', 'dineInVisitId', 'dineInTableVersion']
+    .reduce((context, key) => {
+      if (req.session[key]) context[key] = req.session[key];
+      return context;
+    }, {});
   await sessionOperation(req.session, 'regenerate');
+  Object.assign(req.session, diningContext);
   req.session.auth = { accountId: String(account._id) };
   await sessionOperation(req.session, 'save');
 }

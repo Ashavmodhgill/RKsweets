@@ -16,7 +16,9 @@ const { notificationIdParamsSchema, notificationLimitSchema } = require('../vali
 const { createNotificationController } = require('../controllers/notification.controller');
 const notifications = createNotificationController('customer');
 const showReceipt = require('../controllers/order-receipt.controller').createOrderReceiptController('customer');
+const dining = require('../controllers/dining.controller');
 
+router.get('/dine/:credential', dining.scan);
 router.get('/login', redirectIfAuthenticated('customer'), customerAuth.showLogin);
 router.post('/login', redirectIfAuthenticated('customer'), loginAttemptLimiter, validate(loginSchema), customerAuth.login);
 router.get('/register', redirectIfAuthenticated('customer'), customerAuth.showRegistration);

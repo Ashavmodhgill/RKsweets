@@ -1,6 +1,9 @@
 const crypto = require('node:crypto');
 const mongoose = require('mongoose');
 const BusinessDay = require('../models/business-day.model');
+const DiningTable = require('../models/dining-table.model');
+const DiningVisit = require('../models/dining-visit.model');
+const { createOrReuseVisit } = require('./dining.service');
 const { touchOpenBusinessDay } = require('./business-day.service');
 const { MAX_ITEM_QUANTITY, isPurchasableProduct, productUnitLabel } = require('./customer-cart.service');
 const { ownerOrderPlacedEvent } = require('../constants/notification-events');
@@ -42,7 +45,8 @@ function makeOrderSnapshot({ customerId, customer, cartLines, products, fulfillm
     throw codedError('ORDER_INVALID_FULFILLMENT', 'Choose a valid fulfilment method.');
   }
   if (fulfillmentMethod === 'dine_in'
-    && (diningTable?.isActive !== true || !diningTable?._id || !diningTable?.tableNumber)) {
+    && (diningTable?.isActive !== true || !diningTable?._id || !diningTable?.tableNumber
+      || !diningTable?.qrCredentialHash || !diningTable?.visitId)) {
     throw codedError('ORDER_TABLE_REQUIRED', 'Scan a valid table QR code to place a dine-in order.');
   }
 
@@ -81,7 +85,7 @@ function makeOrderSnapshot({ customerId, customer, cartLines, products, fulfillm
     items,
     fulfillmentMethod,
     ...(fulfillmentMethod === 'dine_in'
-      ? { tableSnapshot: { tableId: diningTable._id, tableNumber: diningTable.tableNumber } }
+      ? { tableSnapshot: { tableId: diningTable._id, tableNumber: diningTable.tableNumber, visitId: diningTable.visitId } }
       : {}),
     totalPaise,
     paymentMethod: 'in_person',
@@ -102,12 +106,21 @@ function clearCartAfterPersistedOrder(session, order) {
   session.cart = [];
   delete session.checkoutQuote;
   delete session.checkoutKey;
-  delete session.dineInTableId;
+  if (order.fulfillmentMethod !== 'dine_in') {
+    delete session.dineInTableId;
+    delete session.dineInCredentialHash;
+    delete session.dineInVisitId;
+    delete session.dineInTableVersion;
+  } else if (order.tableSnapshot?.visitId && String(session.dineInTableId) === String(order.tableSnapshot.tableId)) {
+    session.dineInVisitId = String(order.tableSnapshot.visitId);
+  }
 }
 
 async function placeCustomerOrder({
   OrderModel,
   BusinessDayModel = BusinessDay,
+  DiningTableModel = DiningTable,
+  DiningVisitModel = DiningVisit,
   customerId,
   businessDate,
   idempotencyKey,
@@ -116,6 +129,8 @@ async function placeCustomerOrder({
   products,
   fulfillmentMethod,
   diningTable,
+  expectedVisitId,
+  expectedTableVersion,
   startSession = () => mongoose.startSession(),
 }) {
   const orderId = orderIdFor(customerId, idempotencyKey);
@@ -126,14 +141,30 @@ async function placeCustomerOrder({
     throw codedError('BUSINESS_DAY_NOT_OPEN', 'Ordering is currently closed. Please try again after the owner opens the business day.');
   }
 
-  const snapshot = makeOrderSnapshot({
-    customerId, customer, cartLines, products, fulfillmentMethod, diningTable,
-  });
+  if (fulfillmentMethod === 'dine_in'
+    && (diningTable?.isActive !== true || !diningTable?._id || !diningTable?.tableNumber || !diningTable?.qrCredentialHash)) {
+    throw codedError('ORDER_TABLE_REQUIRED', 'Scan a valid table QR code to place a dine-in order.');
+  }
   const session = await startSession();
   try {
     let order;
     await session.withTransaction(async () => {
       await touchOpenBusinessDay({ date: businessDate, BusinessDayModel, session });
+      let tableForOrder = diningTable;
+      if (fulfillmentMethod === 'dine_in') {
+        const associated = await createOrReuseVisit({
+          tableId: diningTable._id,
+          credentialDigest: diningTable.qrCredentialHash,
+          customerId,
+          expectedVisitId,
+          expectedTableVersion,
+          TableModel: DiningTableModel,
+          VisitModel: DiningVisitModel,
+          session,
+        });
+        tableForOrder = { ...associated.table, visitId: associated.visit._id, qrCredentialHash: diningTable.qrCredentialHash };
+      }
+      const snapshot = makeOrderSnapshot({ customerId, customer, cartLines, products, fulfillmentMethod, diningTable: tableForOrder });
       const [created] = await OrderModel.create([{
         _id: orderId,
         ...snapshot,

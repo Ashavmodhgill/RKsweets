@@ -114,11 +114,11 @@ test('order creation rejects unavailable/deleted products and never accepts inva
 });
 
 test('dine-in snapshots require an active configured table and store only its verified table identity', () => {
-  const diningTable = { _id: TABLE_ID, tableNumber: 'T-04', isActive: true };
+  const diningTable = { _id: TABLE_ID, tableNumber: 'T-04', isActive: true, qrCredentialHash: 'hashed', visitId: '65a000000000000000000021' };
   const order = makeOrderSnapshot({
     customerId: CUSTOMER_ID, customer, cartLines: lines, products: [product], fulfillmentMethod: 'dine_in', diningTable,
   });
-  assert.deepEqual(order.tableSnapshot, { tableId: TABLE_ID, tableNumber: 'T-04' });
+  assert.deepEqual(order.tableSnapshot, { tableId: TABLE_ID, tableNumber: 'T-04', visitId: diningTable.visitId });
   assert.throws(() => makeOrderSnapshot({
     customerId: CUSTOMER_ID, customer, cartLines: lines, products: [product], fulfillmentMethod: 'dine_in',
   }), { code: 'ORDER_TABLE_REQUIRED' });
@@ -186,6 +186,15 @@ test('cart is retained when order persistence fails and clears only after an ord
   clearCartAfterPersistedOrder(session, savedOrder);
   assert.deepEqual(session.cart, []);
   assert.equal(session.checkoutKey, undefined);
+});
+
+test('a dine-in order keeps its verified visit context for another order in the same visit', () => {
+  const session = { cart: [...lines], dineInTableId: TABLE_ID, dineInCredentialHash: 'secure-digest' };
+  clearCartAfterPersistedOrder(session, { _id: 'order-1', fulfillmentMethod: 'dine_in', tableSnapshot: { tableId: TABLE_ID, visitId: '65a000000000000000000021' } });
+  assert.deepEqual(session.cart, []);
+  assert.equal(session.dineInTableId, TABLE_ID);
+  assert.equal(session.dineInCredentialHash, 'secure-digest');
+  assert.equal(session.dineInVisitId, '65a000000000000000000021');
 });
 
 test('checkout is rejected when the business day is closing and the cart remains untouched', async () => {

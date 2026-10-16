@@ -2,9 +2,11 @@ const mongoose = require('mongoose');
 const Order = require('../models/order.model');
 const BusinessDay = require('../models/business-day.model');
 const OrderTokenCounter = require('../models/order-token-counter.model');
+const DiningVisit = require('../models/dining-visit.model');
 const { ORDER_STATUS, COMPLETABLE_ORDER_STATUSES } = require('../constants/order-status');
 const { NOTIFICATION_EVENT, acceptedOrderEvents, customerOrderEvent } = require('../constants/notification-events');
 const { businessDateFor, touchOpenBusinessDay, touchResolvableBusinessDay } = require('./business-day.service');
+const { confirmVisitOnAcceptance } = require('./dining.service');
 
 function suggestedPreparationMinutes(order) {
   return Math.max(0, ...order.items.map((item) => item.prepMinutes));
@@ -22,7 +24,7 @@ async function getOrder(OrderModel, orderId, session) {
   return query.lean();
 }
 
-async function acceptOrder({ orderId, ownerId, confirmedPrepMinutes, adjustmentReason = '', timeZone, now = new Date(), OrderModel = Order, BusinessDayModel = BusinessDay, CounterModel = OrderTokenCounter, startSession = () => mongoose.startSession() }) {
+async function acceptOrder({ orderId, ownerId, confirmedPrepMinutes, adjustmentReason = '', timeZone, now = new Date(), OrderModel = Order, BusinessDayModel = BusinessDay, CounterModel = OrderTokenCounter, DiningVisitModel = DiningVisit, startSession = () => mongoose.startSession() }) {
   const tokenDate = businessDateFor(now, timeZone);
   const session = await startSession();
   let result;
@@ -38,6 +40,12 @@ async function acceptOrder({ orderId, ownerId, confirmedPrepMinutes, adjustmentR
         return;
       }
       await touchOpenBusinessDay({ date: order.businessDate || tokenDate, BusinessDayModel, session });
+      if (order.fulfillmentMethod === 'dine_in') {
+        await confirmVisitOnAcceptance({
+          visitId: order.tableSnapshot?.visitId, customerId: order.customerId, now,
+          VisitModel: DiningVisitModel, session,
+        });
+      }
       const suggestion = suggestedPreparationMinutes(order);
       const reason = String(adjustmentReason || '').trim();
       if (confirmedPrepMinutes !== suggestion && !reason) {

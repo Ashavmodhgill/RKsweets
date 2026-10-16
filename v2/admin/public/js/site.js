@@ -90,3 +90,15 @@ document.querySelectorAll('form[data-confirm]').forEach((form) => {
     if (!window.confirm(form.dataset.confirm)) event.preventDefault();
   });
 });
+
+document.querySelectorAll('[data-copy-value]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const status = button.parentElement.querySelector('[data-copy-status]');
+    try {
+      await navigator.clipboard.writeText(button.dataset.copyValue);
+      if (status) status.textContent = 'Copied.';
+    } catch (_error) {
+      if (status) status.textContent = 'Copy was unavailable. Select and copy the URL above.';
+    }
+  });
+});

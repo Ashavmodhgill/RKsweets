@@ -29,14 +29,14 @@ test('owner order detail and sidebar render navigation to the existing owner rec
   const detail = await render('admin/views/pages/order-detail.ejs', {
     pageTitle: 'Order', assetPrefix: '/assets', account: { name: 'Owner' },
     activePath: '/orders', csrfToken: 'test-csrf', order, labels: {},
-    suggestedPrepMinutes: 0, notice: '',
+    suggestedPrepMinutes: 0, businessDayStatus: 'open', notice: '',
   });
   assert.match(detail, new RegExp(`href="/orders/${ORDER_ID}/receipt"`));
 
   const notFound = await render('admin/views/pages/order-detail.ejs', {
     pageTitle: 'Order not found', assetPrefix: '/assets', account: { name: 'Owner' },
     activePath: '/orders', csrfToken: 'test-csrf', order: null, labels: {},
-    suggestedPrepMinutes: 0, notice: '',
+    suggestedPrepMinutes: 0, businessDayStatus: null, notice: '',
   });
   assert.doesNotMatch(notFound, /\/orders\/[a-f\d]{24}\/receipt/);
 });

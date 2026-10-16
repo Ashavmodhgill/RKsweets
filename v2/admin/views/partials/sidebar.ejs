@@ -1,6 +1,6 @@
 <aside class="admin-sidebar" id="admin-sidebar" aria-label="Owner navigation">
   <a class="admin-brand" href="/" aria-label="RK Sweets dashboard">
-    <span class="brand-mark">RK</span><span><strong>RK Sweets</strong><small>OWNER PORTAL</small></span>
+    <img class="brand-mark" src="/assets/images/logo.png" alt="RK Sweets logo"><span><strong>RK Sweets</strong><small>OWNER PORTAL</small></span>
   </a>
   <p class="sidebar-label">WORKSPACE</p>
   <nav class="admin-nav">
@@ -12,6 +12,7 @@
   <nav class="admin-nav" aria-label="Operations">
     <a class="<%= activePath.startsWith('/orders') ? 'active' : '' %>" href="/orders" <%= activePath.startsWith('/orders') ? 'aria-current="page"' : '' %>><span class="nav-icon">▤</span>Orders</a>
     <a class="<%= activePath.startsWith('/business-days') ? 'active' : '' %>" href="/business-days" <%= activePath.startsWith('/business-days') ? 'aria-current="page"' : '' %>><span class="nav-icon">◷</span>Business Day</a>
+    <a class="<%= activePath.startsWith('/dining') ? 'active' : '' %>" href="/dining" <%= activePath.startsWith('/dining') ? 'aria-current="page"' : '' %>><span class="nav-icon">▦</span>Dining tables</a>
     <a class="<%= activePath.startsWith('/orders') ? 'active' : '' %>" href="/orders" <%= activePath.startsWith('/orders') ? 'aria-current="page"' : '' %>><span class="nav-icon">▧</span>Receipts<small>Browse by order</small></a>
   </nav>
   <p class="sidebar-label sidebar-label-spaced">PREFERENCES</p>

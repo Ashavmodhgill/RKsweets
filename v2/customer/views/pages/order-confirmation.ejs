@@ -3,7 +3,7 @@
   <%- include('../partials/store-header', { account, activePath: '/cart' }) %>
   <main class="store-main order-confirmation-main">
     <section class="order-confirmation-card">
-      <span class="cart-empty-mark" aria-hidden="true">RK</span>
+      <img class="cart-empty-mark" src="/assets/images/logo.png" alt="" aria-hidden="true">
       <p class="eyebrow">ORDER RECEIVED</p>
       <h1>Thank you, <%= order.customerSnapshot.name %>.</h1>
       <% const statusLabels = { pending_owner_acceptance: 'Pending owner acceptance', accepted: 'Accepted', rejected: 'Rejected', preparing: 'Preparing', ready: 'Ready', completed: 'Completed', cancelled: 'Cancelled' }; %>
