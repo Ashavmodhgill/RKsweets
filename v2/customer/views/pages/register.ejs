@@ -1,0 +1,25 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="portal portal-customer">
+  <main class="container auth-card">
+    <p class="eyebrow">RK SWEETS · CUSTOMER</p>
+    <h1>Create your account</h1>
+    <% if (errors.length) { %>
+      <div class="form-error" role="alert">
+        <% errors.forEach((error) => { %><p><%= error %></p><% }) %>
+      </div>
+    <% } %>
+    <form method="post" action="/register">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" autocomplete="name" minlength="2" maxlength="80" value="<%= form.name || '' %>" required>
+      <label for="mobile">Mobile number</label>
+      <input id="mobile" name="mobile" type="tel" inputmode="tel" autocomplete="tel" placeholder="+14155550123" value="<%= form.mobile || '' %>" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" minlength="12" required>
+      <button type="submit">Create account</button>
+    </form>
+    <p class="auth-switch">Already registered? <a href="/login">Sign in</a></p>
+  </main>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

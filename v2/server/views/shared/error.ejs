@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %> | RK Sweets</title>
+    <link rel="stylesheet" href="/assets/css/site.css">
+  </head>
+  <body class="portal">
+    <main class="container">
+      <p class="eyebrow">RK SWEETS</p>
+      <h1><%= statusCode %> · <%= pageTitle %></h1>
+      <p><%= message %></p>
+      <% if (details && details.length) { %>
+        <ul>
+          <% details.forEach((detail) => { %>
+            <li><% if (detail.path) { %><strong><%= detail.path %>:</strong> <% } %><%= detail.message %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+      <a href="<%= portalPath || '/' %>">Return to the portal</a>
+    </main>
+  </body>
+</html>

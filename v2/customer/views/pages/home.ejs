@@ -1,0 +1,17 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="portal portal-customer">
+  <main class="container">
+    <p class="eyebrow">RK SWEETS · CUSTOMER</p>
+    <h1>Welcome, <%= account.name %></h1>
+    <p>Your customer account is signed in.</p>
+    <nav class="portal-actions" aria-label="Customer account">
+      <a href="/profile">View profile</a>
+      <form method="post" action="/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="button-secondary" type="submit">Sign out</button>
+      </form>
+    </nav>
+  </main>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

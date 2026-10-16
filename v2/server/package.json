@@ -1,0 +1,33 @@
+{
+  "name": "rk-sweets-v2-server",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Server-rendered Express and EJS application for RK Sweets V2",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "dev:customer": "node --watch server.js",
+    "dev:admin": "node --watch admin-server.js",
+    "start": "node server.js",
+    "start:customer": "node server.js",
+    "start:admin": "node admin-server.js",
+    "test": "node --test",
+    "check": "node scripts/check-syntax.js",
+    "setup:owner": "node scripts/setup-owner.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3",
+    "connect-mongo": "6.0.0",
+    "dotenv": "18.0.7",
+    "ejs": "7.0.1",
+    "express": "5.3.0",
+    "express-rate-limit": "8.7.0",
+    "express-session": "1.19.0",
+    "helmet": "8.3.0",
+    "mongoose": "9.10.3",
+    "zod": "4.6.5"
+  }
+}

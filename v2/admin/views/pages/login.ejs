@@ -1,0 +1,18 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="portal portal-admin">
+  <main class="container auth-card">
+    <p class="eyebrow">RK SWEETS · OWNER</p>
+    <h1>Owner sign in</h1>
+    <% if (errorMessage) { %><p class="form-error" role="alert"><%= errorMessage %></p><% } %>
+    <form method="post" action="/login">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label for="mobile">Owner mobile number</label>
+      <input id="mobile" name="mobile" type="tel" inputmode="tel" autocomplete="username" placeholder="+14155550123" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Sign in</button>
+    </form>
+  </main>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>
