@@ -8,8 +8,8 @@
     <a class="<%= activePath.startsWith('/products') ? 'active' : '' %>" href="/products" <%= activePath.startsWith('/products') ? 'aria-current="page"' : '' %>><span class="nav-icon">✦</span>Products</a>
   </nav>
   <p class="sidebar-label sidebar-label-spaced">OPERATIONS</p>
-  <nav class="admin-nav" aria-label="Coming soon">
-    <span class="nav-disabled"><span class="nav-icon">▤</span>Orders<small>Coming soon</small></span>
+  <nav class="admin-nav" aria-label="Operations">
+    <a class="<%= activePath.startsWith('/orders') ? 'active' : '' %>" href="/orders" <%= activePath.startsWith('/orders') ? 'aria-current="page"' : '' %>><span class="nav-icon">▤</span>Orders</a>
     <span class="nav-disabled"><span class="nav-icon">▧</span>Invoices &amp; reports<small>Coming soon</small></span>
   </nav>
   <p class="sidebar-label sidebar-label-spaced">PREFERENCES</p>

@@ -1,0 +1,55 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="storefront">
+  <%- include('../partials/store-header', { account, activePath: '/cart' }) %>
+  <main class="store-main checkout-main">
+    <section class="cart-heading">
+      <p class="eyebrow">ALMOST READY</p>
+      <h1>Checkout</h1>
+      <p>Review your current items and choose how you would like to enjoy them.</p>
+    </section>
+    <% if (cartNotice) { %><p class="cart-notice" role="status"><%= cartNotice %></p><% } %>
+    <% if (errorMessage) { %><p class="cart-notice checkout-error" role="alert"><%= errorMessage %></p><% } %>
+    <% if (!cart.items.length) { %>
+      <section class="cart-empty"><h2>Your cart is empty.</h2><p>Add available sweets before placing an order.</p><a class="store-button" href="/products">Browse sweets <span aria-hidden="true">→</span></a></section>
+    <% } else { %>
+      <div class="checkout-layout">
+        <section class="checkout-review" aria-labelledby="checkout-items-title">
+          <div class="checkout-section-heading"><p class="eyebrow">YOUR SELECTION</p><h2 id="checkout-items-title">Order items</h2></div>
+          <div class="checkout-items">
+            <% cart.items.forEach((item) => { %>
+              <article class="checkout-item">
+                <div class="checkout-item-image">
+                  <% if (item.imageUrl) { %><img src="<%= item.imageUrl %>" alt="" loading="lazy"><% } else { %><span aria-hidden="true">RK</span><% } %>
+                </div>
+                <div class="checkout-item-info"><h3><%= item.name %></h3><p><%= item.unitLabel %> · Qty <%= item.quantity %></p><small>₹<%= (item.pricePaise / 100).toFixed(2) %> per unit</small></div>
+                <strong class="checkout-item-total">₹<%= (item.lineSubtotalPaise / 100).toFixed(2) %></strong>
+              </article>
+            <% }) %>
+          </div>
+          <a class="text-link checkout-back-link" href="/cart">← Return to cart</a>
+        </section>
+        <aside class="checkout-panel" aria-label="Place your order">
+          <form method="post" action="/checkout" class="checkout-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="idempotencyKey" value="<%= checkoutKey %>">
+            <p class="eyebrow">FULFILMENT</p>
+            <h2>How would you like your order?</h2>
+            <label class="fulfillment-choice"><input type="radio" name="fulfillmentMethod" value="pickup" checked><span><strong>Pickup</strong><small>Collect your order at the shop counter.</small></span></label>
+            <% if (diningTable) { %>
+              <label class="fulfillment-choice"><input type="radio" name="fulfillmentMethod" value="dine_in"><span><strong>Dine-in · Table <%= diningTable.tableNumber %></strong><small>Your table was verified from its QR code.</small></span></label>
+            <% } else { %>
+              <label class="fulfillment-choice fulfillment-disabled"><input type="radio" name="fulfillmentMethod" value="dine_in" disabled><span><strong>Dine-in</strong><small><%= invalidQr ? 'This table QR is not active.' : 'Scan an active table QR to enable dine-in.' %></small></span></label>
+            <% } %>
+            <div class="checkout-payment"><strong>Pay in person</strong><p>Pickup orders are paid at the counter. For dine-in, pay with staff at the shop.</p></div>
+            <div class="checkout-total"><span>Order total</span><strong>₹<%= (cart.totalPaise / 100).toFixed(2) %></strong></div>
+            <button class="store-button checkout-submit" type="submit">Place order</button>
+            <p class="checkout-pending-note">Your order will be sent to the owner for manual acceptance. No token is issued until it is accepted.</p>
+          </form>
+        </aside>
+      </div>
+    <% } %>
+  </main>
+  <%- include('../partials/store-footer') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

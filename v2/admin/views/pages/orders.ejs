@@ -1,0 +1,27 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="admin-app">
+  <%- include('../partials/app-shell-start', { pageTitle, account, activePath: '/orders' }) %>
+    <div class="page-toolbar"><p><%= total %> customer order<%= total === 1 ? '' : 's' %>. Newest orders appear first.</p></div>
+    <form class="order-filter" method="get" action="/orders">
+      <label for="order-status">Status</label>
+      <select id="order-status" name="status"><option value="">All orders</option><% statuses.forEach((value) => { %><option value="<%= value %>" <%= status === value ? 'selected' : '' %>><%= labels[value] %></option><% }) %></select>
+      <button class="button-secondary" type="submit">Filter</button>
+    </form>
+    <% if (!orders.length) { %>
+      <section class="empty-state"><h2>No orders found</h2><p><%= status ? `There are no orders with status “${labels[status]}”.` : 'Customer orders will appear here after checkout.' %></p><% if (status) { %><a class="inline-link" href="/orders">View all orders</a><% } %></section>
+    <% } else { %>
+      <section class="dashboard-panel order-list-panel"><div class="owner-order-list">
+        <% orders.forEach((order) => { %><article class="owner-order-card">
+          <div class="owner-order-card-head"><div><span class="eyebrow">PLACED <%= new Date(order.createdAt).toLocaleString() %></span><h2><a href="/orders/<%= order._id %>">Order <%= order.officialToken ? `#${order.officialToken}` : 'awaiting token' %></a></h2></div><span class="status order-status"><%= labels[order.status] || order.status %></span></div>
+          <div class="owner-order-meta"><span><strong><%= order.customerSnapshot.name %></strong> · <%= order.customerSnapshot.mobile %></span><span><%= order.fulfillmentMethod === 'dine_in' ? `Dine-in · Table ${order.tableSnapshot?.tableNumber || '—'}` : 'Pickup' %></span><strong>₹<%= (order.totalPaise / 100).toFixed(2) %></strong></div>
+          <ul class="owner-order-items"><% order.items.forEach((item) => { %><li><span><%= item.name %> · <%= item.unitLabel %> × <%= item.quantity %></span><span>₹<%= (item.lineTotalPaise / 100).toFixed(2) %></span></li><% }) %></ul>
+          <% if (Number.isSafeInteger(order.confirmedPrepMinutes)) { %><p class="order-prep-note">Confirmed preparation estimate: <strong><%= order.confirmedPrepMinutes %> min</strong></p><% } %>
+          <a class="inline-link" href="/orders/<%= order._id %>">Review order <span aria-hidden="true">→</span></a>
+        </article><% }) %>
+      </div></section>
+      <% if (pages > 1) { %><nav class="order-pagination" aria-label="Order pages"><% if (page > 1) { %><a href="/orders?<%= new URLSearchParams({ ...(status ? { status } : {}), page: String(page - 1) }) %>">← Previous</a><% } %><span>Page <%= page %> of <%= pages %></span><% if (page < pages) { %><a href="/orders?<%= new URLSearchParams({ ...(status ? { status } : {}), page: String(page + 1) }) %>">Next →</a><% } %></nav><% } %>
+    <% } %>
+  <%- include('../partials/app-shell-end') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

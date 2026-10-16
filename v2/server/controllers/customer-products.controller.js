@@ -2,6 +2,7 @@ const Product = require('../models/product.model');
 
 function publicProduct(product) {
   return {
+    _id: String(product._id),
     slug: product.slug,
     name: product.name,
     description: product.description,

@@ -13,6 +13,7 @@
     "start:admin": "node admin-server.js",
     "test": "node --test",
     "check": "node scripts/check-syntax.js",
+    "setup:checkout-indexes": "node scripts/setup-checkout-indexes.js",
     "setup:customer-indexes": "node scripts/setup-customer-indexes.js",
     "setup:owner": "node scripts/setup-owner.js"
   },

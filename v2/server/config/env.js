@@ -24,6 +24,11 @@ function readEnv(source = process.env) {
   if (result.data.ADMIN_SESSION_SECRET === result.data.CUSTOMER_SESSION_SECRET) {
     throw new Error('Admin and customer session secrets must be different.');
   }
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: result.data.BUSINESS_TIMEZONE });
+  } catch {
+    throw new Error('BUSINESS_TIMEZONE must be a valid IANA timezone.');
+  }
 
   return Object.freeze(result.data);
 }

@@ -1,0 +1,16 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="storefront">
+  <%- include('../partials/store-header', { account, activePath: '/orders' }) %>
+  <main class="store-main customer-orders-main">
+    <section class="customer-orders-heading"><p class="eyebrow">YOUR RK SWEETS ORDERS</p><h1>My orders</h1><p>Track owner acceptance and view your order token and preparation estimate.</p></section>
+    <% if (!orders.length) { %><section class="customer-orders-empty"><span class="cart-empty-mark" aria-hidden="true">RK</span><h2>No orders yet</h2><p>Orders you place will appear here.</p><a class="store-button" href="/products">Browse sweets <span aria-hidden="true">→</span></a></section><% } else { %>
+      <section class="customer-order-list" aria-label="Your orders">
+        <% orders.forEach((order) => { %><article class="customer-order-card"><div class="customer-order-card-top"><div><p class="eyebrow">PLACED <%= new Date(order.createdAt).toLocaleString() %></p><h2>Order <%= order.officialToken ? `#${order.officialToken}` : 'awaiting acceptance' %></h2></div><span class="customer-order-status"><%= order.status.replaceAll('_', ' ') %></span></div><p><%= order.fulfillmentMethod === 'dine_in' ? `Dine-in · Table ${order.tableSnapshot?.tableNumber || '—'}` : 'Pickup' %> · <strong>₹<%= (order.totalPaise / 100).toFixed(2) %></strong></p><% if (order.status === pendingStatus) { %><p>Awaiting manual owner acceptance. No token has been issued.</p><% } else if (order.status === 'rejected') { %><p>This order was rejected. Open its details to view the owner's note.</p><% } else if (Number.isSafeInteger(order.confirmedPrepMinutes)) { %><p>Confirmed preparation estimate: <strong><%= order.confirmedPrepMinutes %> minutes</strong>.</p><% } %><a class="customer-order-link" href="/orders/<%= order._id %>">View order details <span aria-hidden="true">→</span></a></article><% }) %>
+      </section>
+      <% if (pages > 1) { %><nav class="customer-order-pagination" aria-label="Order pages"><% if (page > 1) { %><a href="/orders?page=<%= page - 1 %>">← Previous</a><% } %><span>Page <%= page %> of <%= pages %></span><% if (page < pages) { %><a href="/orders?page=<%= page + 1 %>">Next →</a><% } %></nav><% } %>
+    <% } %>
+  </main>
+  <%- include('../partials/store-footer') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

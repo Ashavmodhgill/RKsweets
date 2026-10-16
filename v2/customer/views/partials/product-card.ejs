@@ -8,5 +8,10 @@
     <p class="card-description"><%= product.description %></p>
     <div class="card-meta"><strong>₹<%= (product.pricePaise / 100).toFixed(2) %></strong><span><%= product.unitType === 'weight' ? `${product.weightAmount} ${product.weightUnit}` : `${product.quantityPerPiece} per piece` %></span></div>
     <p class="prep-time">Estimated preparation: <%= product.prepMinutes %> min</p>
+    <form class="cart-add-form" method="post" action="/cart/items/<%= encodeURIComponent(product._id) %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" <%= product.isAvailable ? '' : 'disabled' %>><%= product.isAvailable ? 'Add to cart' : 'Unavailable' %></button>
+    </form>
   </div>
 </article>

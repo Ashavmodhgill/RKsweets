@@ -65,6 +65,7 @@ function createApp(env, portal) {
     collectionName: isAdmin ? 'admin_sessions' : 'customer_sessions',
   });
   app.locals.portalPath = '/';
+  app.locals.businessTimezone = env.BUSINESS_TIMEZONE;
 
   app.disable('x-powered-by');
   app.set('trust proxy', env.TRUST_PROXY);

@@ -1,0 +1,27 @@
+<%- include('../partials/head', { pageTitle, assetPrefix: '/assets' }) %>
+<body class="storefront">
+  <%- include('../partials/store-header', { account, activePath: '/cart' }) %>
+  <main class="store-main order-confirmation-main">
+    <section class="order-confirmation-card">
+      <span class="cart-empty-mark" aria-hidden="true">RK</span>
+      <p class="eyebrow">ORDER RECEIVED</p>
+      <h1>Thank you, <%= order.customerSnapshot.name %>.</h1>
+      <% const statusLabels = { pending_owner_acceptance: 'Pending owner acceptance', accepted: 'Accepted', rejected: 'Rejected', preparing: 'Preparing', ready: 'Ready', completed: 'Completed', cancelled: 'Cancelled' }; %>
+      <p><%= order.status === 'pending_owner_acceptance' ? 'Your order is awaiting manual acceptance by the RK Sweets owner. No token has been issued yet.' : order.status === 'rejected' ? 'The RK Sweets owner could not accept this order. See the reason below.' : 'Your order has been accepted by the RK Sweets owner.' %></p>
+      <div class="order-status-line"><span>Status</span><strong><%= statusLabels[order.status] || order.status %></strong></div>
+      <% if (order.officialToken) { %><div class="order-status-line"><span>Your token · <%= order.tokenDate %></span><strong><%= order.officialToken %></strong></div><div class="order-status-line"><span>Confirmed preparation estimate</span><strong><%= order.confirmedPrepMinutes %> minutes</strong></div><p class="confirmation-payment">This estimate is not an exact completion-time promise.</p><% } %>
+      <% if (order.rejectionReason) { %><div class="order-rejection-reason"><strong>Owner’s note</strong><p><%= order.rejectionReason %></p></div><% } %>
+      <div class="order-status-line"><span>Fulfilment</span><strong><%= order.fulfillmentMethod === 'dine_in' ? `Dine-in · Table ${order.tableSnapshot.tableNumber}` : 'Pickup' %></strong></div>
+      <section class="confirmation-items" aria-label="Ordered items">
+        <% order.items.forEach((item) => { %><div><span><%= item.name %> · <%= item.unitLabel %> × <%= item.quantity %></span><strong>₹<%= (item.lineTotalPaise / 100).toFixed(2) %></strong></div><% }) %>
+      </section>
+      <div class="order-status-line confirmation-total"><span>Total · pay in person</span><strong>₹<%= (order.totalPaise / 100).toFixed(2) %></strong></div>
+      <p class="confirmation-payment">Pickup is paid at the counter. For dine-in, pay with staff at the shop.</p>
+      <a class="store-button" href="/orders">View my orders <span aria-hidden="true">→</span></a>
+      <a class="store-button" href="/products">Continue shopping <span aria-hidden="true">→</span></a>
+    </section>
+  </main>
+  <%- include('../partials/store-footer') %>
+  <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
+</body>
+</html>

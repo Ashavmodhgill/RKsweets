@@ -21,7 +21,7 @@
           </article><% }) %>
         </div><% } else { %><div class="dashboard-empty"><span class="empty-mark">✦</span><h3>Your catalogue starts here</h3><p>Add your first product to show customers what’s fresh.</p><a class="button-primary" href="/products/new">Add your first product</a></div><% } %>
       </section>
-      <section class="dashboard-shortcuts"><a href="/products"><span>✦</span><div><strong>Manage products</strong><small>Update details, prices, and availability</small></div><b aria-hidden="true">→</b></a><div class="shortcut-disabled"><span>▤</span><div><strong>Orders</strong><small>Order management is coming soon</small></div><b>Coming soon</b></div></section>
+      <section class="dashboard-shortcuts"><a href="/products"><span>✦</span><div><strong>Manage products</strong><small>Update details, prices, and availability</small></div><b aria-hidden="true">→</b></a><a href="/orders"><span>▤</span><div><strong>Manage orders</strong><small>Review, accept, reject, and complete customer orders</small></div><b aria-hidden="true">→</b></a></section>
   <%- include('../partials/app-shell-end') %>
   <%- include('../partials/foot', { assetPrefix: '/assets' }) %>
 </body>
