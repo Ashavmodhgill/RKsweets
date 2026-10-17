@@ -7,8 +7,11 @@
     <% if (errorMessage) { %><p class="form-error" role="alert"><%= errorMessage %></p><% } %>
     <form method="post" action="/login">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <label for="mobile">Owner mobile number</label>
-      <input id="mobile" name="mobile" type="tel" inputmode="tel" autocomplete="username" placeholder="+14155550123" required>
+      <div class="login-phone-fields">
+        <div><label for="country-code">Country code</label><input id="country-code" name="countryCode" type="tel" inputmode="tel" autocomplete="tel-country-code" value="+91" required></div>
+        <div><label for="mobile">Owner mobile number</label><input id="mobile" name="mobile" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="98765 43210" aria-describedby="phone-code-help" required></div>
+      </div>
+      <p class="phone-code-help" id="phone-code-help">Country code is remembered on this device. You can also enter a full number starting with +.</p>
       <label for="password">Password</label>
       <input id="password" name="password" type="password" autocomplete="current-password" required>
       <button type="submit">Sign in</button>

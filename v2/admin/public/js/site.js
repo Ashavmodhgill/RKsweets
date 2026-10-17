@@ -2,6 +2,30 @@ const productForm = document.querySelector('#product-form');
 const adminShell = document.querySelector('#admin-shell');
 const menuToggle = document.querySelector('#admin-menu-toggle');
 const menuScrim = document.querySelector('#admin-menu-scrim');
+const loginCountryCode = document.querySelector('#country-code');
+
+if (loginCountryCode) {
+  const storageKey = 'rk-sweets.login-country-code';
+  const normalizeCountryCode = (value) => {
+    const compact = value.trim().replace(/[\s().-]/g, '');
+    return compact.startsWith('+') ? compact : `+${compact}`;
+  };
+  const isCountryCode = (value) => /^\+[1-9]\d{0,2}$/.test(value);
+
+  try {
+    const remembered = localStorage.getItem(storageKey);
+    if (remembered && isCountryCode(remembered)) loginCountryCode.value = remembered;
+  } catch {}
+
+  const rememberCountryCode = () => {
+    const normalized = normalizeCountryCode(loginCountryCode.value);
+    if (!isCountryCode(normalized)) return;
+    loginCountryCode.value = normalized;
+    try { localStorage.setItem(storageKey, normalized); } catch {}
+  };
+  loginCountryCode.addEventListener('change', rememberCountryCode);
+  loginCountryCode.form?.addEventListener('submit', rememberCountryCode);
+}
 
 if (adminShell && menuToggle && menuScrim) {
   const closeMenu = () => {

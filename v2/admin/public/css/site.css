@@ -48,6 +48,71 @@ p {
   max-width: 560px;
 }
 
+.login-phone-fields {
+  display: grid;
+  grid-template-columns: minmax(96px, .34fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.login-phone-fields > div {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.phone-code-help {
+  margin: -2px 0 4px;
+  color: #71695e;
+  font-size: 12px;
+}
+
+.auth-card {
+  width: min(100% - 32px, 520px);
+  margin: clamp(28px, 9vh, 88px) auto;
+  padding: clamp(24px, 6vw, 48px);
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(45, 35, 20, .09);
+}
+
+.auth-card h1 {
+  margin: 8px 0 18px;
+}
+
+.auth-card form {
+  gap: 11px;
+}
+
+.auth-card form > input,
+.auth-card form > .login-phone-fields input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+}
+
+.auth-card form > button {
+  min-height: 48px;
+  margin-top: 5px;
+  border-radius: 7px;
+  font-weight: 700;
+}
+
+.login-phone-fields input {
+  padding-inline: 10px;
+}
+
+@media (max-width: 380px) {
+  .login-phone-fields {
+    grid-template-columns: minmax(88px, .38fr) minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .auth-card {
+    width: calc(100% - 24px);
+    padding: 22px 18px;
+  }
+}
+
 form {
   display: grid;
   gap: 10px;

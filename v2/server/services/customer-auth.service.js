@@ -1,5 +1,6 @@
 const Customer = require('../models/customer.model');
 const { customerRegistrationSchema, loginSchema } = require('../validators/auth.validator');
+const { mobileLookupCandidates } = require('../utils/mobile-number');
 const { hashPassword, verifyPassword, verifyMissingAccountPassword } = require('./password-auth.service');
 
 function customerError(code, message) {
@@ -45,7 +46,7 @@ async function registerCustomer(input) {
 
 async function authenticateCustomer(input) {
   const values = loginSchema.parse(input);
-  const customer = await Customer.findOne({ mobile: values.mobile }).select('+passwordHash');
+  const customer = await Customer.findOne({ mobile: { $in: mobileLookupCandidates(values.mobile) } }).select('+passwordHash');
   if (!customer) {
     await verifyMissingAccountPassword(values.password);
     return null;

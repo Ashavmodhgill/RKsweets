@@ -1,5 +1,6 @@
 const Owner = require('../models/owner.model');
 const { loginSchema, ownerCreationSchema } = require('../validators/auth.validator');
+const { mobileLookupCandidates } = require('../utils/mobile-number');
 const { hashPassword, verifyPassword, verifyMissingAccountPassword } = require('./password-auth.service');
 
 function ownerError(code, message) {
@@ -26,7 +27,7 @@ function toPublicOwner(owner) {
 
 async function authenticateOwner(input) {
   const values = loginSchema.parse(input);
-  const owner = await Owner.findOne({ ownerKey: 'primary', mobile: values.mobile }).select('+passwordHash');
+  const owner = await Owner.findOne({ ownerKey: 'primary', mobile: { $in: mobileLookupCandidates(values.mobile) } }).select('+passwordHash');
   if (!owner) {
     await verifyMissingAccountPassword(values.password);
     return null;
