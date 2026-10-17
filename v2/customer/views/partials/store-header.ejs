@@ -1,6 +1,7 @@
 <header class="store-header">
   <a class="store-brand" href="/" aria-label="RK Sweets home"><img class="store-brand-mark" src="/assets/images/logo.png" alt="RK Sweets logo"><span><strong>RK Sweets</strong><small>MADE FOR SHARING</small></span></a>
-  <nav class="store-nav" aria-label="Store navigation">
+  <button class="store-menu-toggle" type="button" aria-label="Open store navigation" aria-controls="store-navigation" aria-expanded="false" id="store-menu-toggle">☰</button>
+  <nav class="store-nav" id="store-navigation" aria-label="Store navigation">
     <a class="<%= activePath === '/' ? 'active' : '' %>" href="/">Home</a>
     <a class="<%= activePath.startsWith('/products') ? 'active' : '' %>" href="/products">Our sweets</a>
     

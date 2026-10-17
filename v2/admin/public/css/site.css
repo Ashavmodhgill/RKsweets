@@ -758,6 +758,7 @@ img.brand-mark,img.identity-mark {
   min-height: 94px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   padding: 18px clamp(20px,4vw,56px);
   border-bottom: 1px solid #e5ded3;
@@ -786,7 +787,7 @@ img.brand-mark,img.identity-mark {
 .identity-mark {
   width: 37px;
   height: 37px;
-  background: #f8f0e2;
+  background:none;
   font-size: 15px;
 }
 
@@ -1397,3 +1398,71 @@ img.brand-mark,img.identity-mark {
 .business-day-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:22px 0}.business-day-heading h2{margin:5px 0;color:var(--navy,#182849);font:600 clamp(26px,4vw,36px) var(--font-display,Georgia,serif)}.business-day-heading p:last-child{margin:5px 0;color:#687184}.business-day-status{padding:8px 13px;border-radius:999px;font-size:13px;font-weight:800;text-transform:capitalize}.status-open{background:#e4f3e8;color:#24613b}.status-closing{background:#fff1d7;color:#785111}.status-closed,.status-not-open{background:#eceef2;color:#4e5665}.business-day-notice,.business-day-payment-note,.business-day-blocked,.business-day-clear{padding:13px 15px;border-radius:10px;line-height:1.5}.business-day-notice{background:#f8f4e9;color:#5d4a24}.business-day-payment-note{margin:14px 0;background:#fff8e9;color:#654f22}.business-day-blocked{background:#fff2f0;color:#762f29}.business-day-clear{background:#e8f5eb;color:#285b37}.business-day-times{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:18px}.business-day-times div,.business-day-status-grid>div{display:grid;gap:5px}.business-day-times span,.business-day-status-grid span{color:#697184;font-size:13px}.business-day-times strong{color:var(--navy,#182849)}.business-day-times small{color:#788092}.business-day-metrics{margin:18px 0}.business-day-action{margin:18px 0}.business-day-action h2,.business-day-status-summary h2,.business-day-report-section h2{margin-top:0;color:var(--navy,#182849)}.business-day-action>p{color:#5e6676;line-height:1.55}.business-day-action form{display:grid;justify-items:start;gap:12px}.business-day-confirm{display:flex;align-items:flex-start;gap:9px;color:#414a5c;line-height:1.5}.business-day-confirm input{margin-top:4px}.business-day-outstanding{margin:18px 0}.business-day-outstanding ul{display:grid;gap:9px;margin:0;padding:0;list-style:none}.business-day-outstanding li{display:grid;grid-template-columns:minmax(180px,1fr) minmax(120px,.7fr) auto;align-items:center;gap:12px;padding:12px;border:1px solid #e7e5e0;border-radius:10px}.business-day-outstanding a,.business-day-report-card h2 a{color:var(--navy,#182849);font-weight:700;text-decoration:none}.business-day-outstanding small{grid-column:1/-1;color:#7b5b22}.business-day-status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.business-day-status-grid>div{padding:13px;border:1px solid #e8e6e1;border-radius:10px;background:#fff}.business-day-status-grid strong{color:var(--navy,#182849);font-size:20px}.business-day-report-list{display:grid;gap:14px}.business-day-report-card{display:grid;grid-template-columns:minmax(180px,1fr) minmax(170px,.6fr) auto;align-items:center;gap:18px}.business-day-report-card h2{margin:5px 0}.business-day-report-card p,.business-day-report-card small{color:#687184}.business-day-report-card>div:nth-child(2){display:grid;gap:5px}.business-day-report-card>div:nth-child(2) strong{color:var(--navy,#182849);font-size:20px}.business-day-report-section{margin-top:18px}.business-day-report-section>p{color:#555e70;line-height:1.6}
 @media(max-width:700px){.business-day-heading{align-items:flex-start}.business-day-outstanding li{grid-template-columns:1fr;gap:6px}.business-day-report-card{grid-template-columns:1fr}.business-day-report-card .button-secondary{justify-self:start}}
 .dining-create,.dining-qr-issued{margin:16px 0}.dining-create h2,.dining-qr-issued h2{margin-top:0;color:var(--navy,#182849)}.dining-create-form{display:flex;align-items:end;gap:12px;flex-wrap:wrap}.dining-create-form label,.dining-rename-form label{display:grid;gap:6px;color:#505a6d;font-size:13px;font-weight:700}.dining-create-form input,.dining-rename-form input{min-width:180px;padding:10px 12px;border:1px solid #d8dce3;border-radius:8px;font:inherit}.dining-qr-issued{display:grid;justify-items:start;gap:10px}.dining-qr-issued code{max-width:100%;overflow-wrap:anywhere;padding:10px 12px;border-radius:8px;background:#f5f3ee;color:#273451}.dining-filters{display:flex;gap:8px;overflow-x:auto;margin:18px 0}.dining-filters a{flex:none;padding:8px 12px;border:1px solid #e3e2de;border-radius:999px;color:#414b5f;text-decoration:none}.dining-filters a.active{background:var(--navy,#182849);border-color:var(--navy,#182849);color:#fff}.dining-table-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px}.dining-table-card{min-width:0;display:grid;align-content:start;gap:12px}.dining-table-card>header{display:flex;align-items:center;justify-content:space-between;gap:12px}.dining-table-card h2{margin:3px 0;color:var(--navy,#182849)}.dining-table-card>p{margin:0;color:#5d6677;line-height:1.5}.status-pending{background:#fff1d7;color:#785111}.dining-order-list{display:grid;gap:7px;margin:0;padding:0;list-style:none}.dining-order-list li{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:10px;border:1px solid #ebe9e4;border-radius:8px}.dining-order-list a{color:var(--navy,#182849);font-weight:700;text-decoration:none}.dining-order-list span{grid-column:1/-1;color:#656e7e;font-size:13px}.dining-table-card form{display:grid;justify-items:start;gap:8px}.dining-table-card form small{color:#6c7483}.dining-rename-form{grid-template-columns:1fr auto;align-items:end;padding-top:12px;border-top:1px solid #eceae6}.dining-table-actions{display:flex;gap:18px;flex-wrap:wrap}.dining-table-actions form{display:block}.dining-table-actions button{padding:4px 0}@media(max-width:600px){.dining-create-form{align-items:stretch;flex-direction:column}.dining-create-form input{width:100%;box-sizing:border-box}.dining-rename-form{grid-template-columns:1fr}.dining-order-list li{grid-template-columns:1fr}}
+
+@media (max-width:700px) {
+  .admin-topbar {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 36px;
+    grid-template-areas: "menu title notify" "identity identity identity";
+    gap: 8px 10px;
+    min-height: 0;
+    padding: 12px 14px;
+  }
+  .menu-toggle {
+    grid-area: menu;
+    display: grid;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    place-items: center;
+    padding: 0;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .topbar-title {
+    grid-area: title;
+    min-width: 0;
+  }
+  .topbar-title .eyebrow {
+    font-size: 8px;
+    letter-spacing: .1em;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .topbar-title h1 {
+    overflow: hidden;
+    margin-top: 3px;
+    font-size: 20px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .admin-notification-link {
+    grid-area: notify;
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+    padding: 0;
+  }
+  .shop-identity {
+    grid-area: identity;
+    justify-self: start;
+    min-width: 0;
+    margin: 0;
+    gap: 8px;
+  }
+  .shop-identity > span {
+    min-width: 0;
+  }
+  .shop-identity strong {
+    white-space: nowrap;
+  }
+  .shop-identity small {
+    max-width: min(220px, 65vw);
+  }
+  .identity-mark {
+    width: 34px;
+    height: 34px;
+  }
+}
