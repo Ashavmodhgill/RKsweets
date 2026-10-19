@@ -309,9 +309,3 @@ Day and existing order/token workflows.
 Reservations, split billing, online payments, waiter accounts, and
 advanced queue prediction are outside the initial scope unless
 explicitly added later.
-
-------------------------------------------------------------------------
-
-**Maintainer note:** Keep this README aligned with the actual source.
-Update commands, environment variables, setup requirements, and feature
-status based on verified code and test results.
