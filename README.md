@@ -46,7 +46,6 @@ the configured application database.
   - [Database and deployment](#database-and-deployment)
   - [Security](#security)
   - [Testing](#testing)
-  - [Next steps](#next-steps)
 
 ## Overview
 
@@ -298,14 +297,4 @@ owner product/category management, order transitions, token uniqueness,
 Business Day opening/closing, receipts, Cloudinary uploads, responsive
 layouts, and the dining workflow once implemented.
 
-## Next steps
 
-The planned Dining System enhancements are: 1. Owner table management.
-2. Secure QR credential validation and revocation. 3. Multiple orders
-per table visit. 4. Occupancy independent of individual order status. 5.
-Owner-controlled manual table clearance. 6. Integration with Business
-Day and existing order/token workflows.
-
-Reservations, split billing, online payments, waiter accounts, and
-advanced queue prediction are outside the initial scope unless
-explicitly added later.
